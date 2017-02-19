@@ -1,7 +1,7 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.repository.DatamineDAO;
-import com.github.sinedsem.infgres.repository.datamodel.entities.Battery;
+import com.github.sinedsem.infgres.datamodel.datamine.Battery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -10,14 +10,17 @@ import org.springframework.stereotype.Service;
 public class PersisterService {
 
 
+    private final DatamineDAO datamineDAO;
+
     @Autowired
-    @Qualifier("repository")
-    DatamineDAO datamineDAO;
+    public PersisterService(@Qualifier("repository") DatamineDAO datamineDAO) {
+        this.datamineDAO = datamineDAO;
+    }
 
     public boolean persist(Battery battery) {
-        if (!datamineDAO.isNodeExists(battery.getNode())){
-            datamineDAO.createNode(battery.getNode());
-        }
+//        if (!datamineDAO.isNodeExists(battery.getNodeId())) {
+//            datamineDAO.createNode(battery.getNodeId());
+//        }
         datamineDAO.insertData(battery);
         return true;
     }

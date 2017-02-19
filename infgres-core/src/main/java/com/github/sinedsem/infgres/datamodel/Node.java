@@ -1,4 +1,4 @@
-package com.github.sinedsem.infgres.repository.datamodel;
+package com.github.sinedsem.infgres.datamodel;
 
 import java.util.UUID;
 

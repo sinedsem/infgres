@@ -1,7 +1,7 @@
 package com.github.sinedsem.infgres.repository;
 
-import com.github.sinedsem.infgres.repository.datamodel.Node;
-import com.github.sinedsem.infgres.repository.datamodel.entities.Battery;
+import com.github.sinedsem.infgres.datamodel.Node;
+import com.github.sinedsem.infgres.datamodel.datamine.Battery;
 
 public interface DatamineDAO {
 

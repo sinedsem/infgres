@@ -1,9 +1,9 @@
-package com.github.sinedsem.infgres.application;
+package com.github.sinedsem.infgres;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"com.github.sinedsem.infgres"})
+@SpringBootApplication()
 public class InfgresCoreApplication {
 
     public static void main(String[] args) {

@@ -1,8 +1,8 @@
 package com.github.sinedsem.infgres.repository.impl;
 
+import com.github.sinedsem.infgres.datamodel.Node;
+import com.github.sinedsem.infgres.datamodel.datamine.Battery;
 import com.github.sinedsem.infgres.repository.DatamineDAO;
-import com.github.sinedsem.infgres.repository.datamodel.Node;
-import com.github.sinedsem.infgres.repository.datamodel.entities.Battery;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -13,28 +13,34 @@ import java.util.UUID;
 
 public class PostgresDAO implements DatamineDAO {
 
+
+
+
     protected final JdbcTemplate jdbcTemplate;
-
-    private static final String CREATE_NODE = "INSERT INTO public.node (f_id, f_name) VALUES (?, ?)";
-    private static final String CHECK_NODE = "SELECT COUNT(f_id) FROM public.node WHERE f_id=?";
-
-    private static final String BATTERY_DATA_INSERT = "INSERT INTO public.battery (f_id, f_node_id, f_starttime, f_endtime, f_number, f_charge) VALUES (?,?,?,?,?,?)";
-    private static final String BATTERY_DATA_FIND_PREV = "SELECT f_id, f_starttime, f_endtime FROM public.battery WHERE f_starttime <= ? AND f_node_id = ?";
-    private static final String BATTERY_DATA_FIND_NEXT = "SELECT f_id, f_starttime, f_endtime FROM public.battery WHERE f_starttime > ? AND f_node_id = ?";
+//
+//    @Autowired
+//    private BatteryRepository batteryRepository;
 
     public PostgresDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+//    @PostConstruct
+//    private void init() {
+//        for (Battery battery : batteryRepository.findAll()) {
+//            System.out.println(battery.getId());
+//        }
+//    }
+
 
     @Override
     public void createNode(Node node) {
-        jdbcTemplate.update(CREATE_NODE, node.getId(), node.getName());
+        jdbcTemplate.update("INSERT INTO public.node (f_id, f_name) VALUES (?, ?)", node.getId(), node.getName());
     }
 
     @Override
     public boolean isNodeExists(Node node) {
-        return jdbcTemplate.queryForObject(CHECK_NODE, Integer.class, node.getId()) > 0;
+        return jdbcTemplate.queryForObject("SELECT COUNT(f_id) FROM public.node WHERE f_id=?", Integer.class, node.getId()) > 0;
     }
 
     @Override
@@ -43,8 +49,8 @@ public class PostgresDAO implements DatamineDAO {
         boolean insert = true;
         boolean truncate = false;
 
-        List<Battery> prev = jdbcTemplate.query(BATTERY_DATA_FIND_PREV, new BatteryRowMapper(), battery.getStartTime(), battery.getNode().getId());
-        List<Battery> next = jdbcTemplate.query(BATTERY_DATA_FIND_NEXT, new BatteryRowMapper(), battery.getStartTime(), battery.getNode().getId());
+        List<Battery> prev = jdbcTemplate.query("SELECT f_id, f_starttime, f_endtime FROM public.battery WHERE f_starttime <= ? AND f_node_id = ?", new BatteryRowMapper(), battery.getStartTime(), battery.getNodeId());
+        List<Battery> next = jdbcTemplate.query("SELECT f_id, f_starttime, f_endtime FROM public.battery WHERE f_starttime > ? AND f_node_id = ?", new BatteryRowMapper(), battery.getStartTime(), battery.getNodeId());
 
         System.out.println(prev.size());
         System.out.println(next.size());
@@ -54,19 +60,20 @@ public class PostgresDAO implements DatamineDAO {
             insert = true;
         }
 
-        if (!prev.isEmpty()){
+        if (!prev.isEmpty()) {
 
-            if (prev.equals(battery)){
+            if (prev.equals(battery)) {
                 //extend
-            }else{
-            // truncate
-            // set prev.endtime = battery.starttime-1
+            } else {
+                // truncate
+                // set prev.endtime = battery.starttime-1
 
             }
         }
 
         if (insert) {
-            jdbcTemplate.update(BATTERY_DATA_INSERT, battery.getId(), battery.getNode().getId(), battery.getStartTime(), battery.getEndTime(), battery.getNumber(), battery.getCharge());
+            jdbcTemplate.update("INSERT INTO public.battery (f_id, f_node_id, f_starttime, f_endtime, f_number, f_charge) VALUES (?,?,?,?,?,?)",
+                    battery.getId(), battery.getNodeId(), battery.getStartTime(), battery.getEndTime(), battery.getNumber(), battery.getCharge());
         }
     }
 

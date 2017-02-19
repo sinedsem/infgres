@@ -1,6 +1,8 @@
 package com.github.sinedsem.infgres.config;
 
+import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.repository.DatamineDAO;
+import com.github.sinedsem.infgres.repository.RequestHistoryRepository;
 import com.github.sinedsem.infgres.repository.impl.InfluxPostgresDAO;
 import com.github.sinedsem.infgres.repository.impl.PostgresDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,10 @@ public class Config {
 
     @Bean(name = "repository")
     @Autowired
-    public DatamineDAO getRepository(JdbcTemplate jdbcTemplate) {
+    public DatamineDAO getRepository(JdbcTemplate jdbcTemplate, RequestHistoryRepository requestHistoryRepository) {
+        for (AgentReport agentReport : requestHistoryRepository.findAll()) {
+            System.out.println(agentReport.getFunction());
+        }
         if (influx) {
             return new InfluxPostgresDAO(jdbcTemplate);
         } else {

@@ -1,6 +1,6 @@
-package com.github.sinedsem.infgres.repository.datamodel.entities;
+package com.github.sinedsem.infgres.datamodel.datamine;
 
-public class Battery extends DatamineEntity {
+public class Battery extends DatamineEntity implements Continuous {
 
     private int number;
     private int charge;
