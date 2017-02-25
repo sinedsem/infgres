@@ -1,27 +1,34 @@
 package com.github.sinedsem.infgres.service;
 
-import com.github.sinedsem.infgres.repository.DatamineDAO;
-import com.github.sinedsem.infgres.datamodel.datamine.Battery;
+import com.github.sinedsem.infgres.datamodel.Node;
+import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
+import com.github.sinedsem.infgres.repository.NodeRepository;
+import com.github.sinedsem.infgres.repository.datamine.DatamineCrudRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PersisterService {
 
 
-    private final DatamineDAO datamineDAO;
+    private final RepositoriesService repositoriesService;
+    private final NodeRepository nodeRepository;
 
     @Autowired
-    public PersisterService(@Qualifier("repository") DatamineDAO datamineDAO) {
-        this.datamineDAO = datamineDAO;
+    public PersisterService(RepositoriesService repositoriesService, NodeRepository nodeRepository) {
+        this.repositoriesService = repositoriesService;
+        this.nodeRepository = nodeRepository;
     }
 
-    public boolean persist(Battery battery) {
-//        if (!datamineDAO.isNodeExists(battery.getNodeId())) {
-//            datamineDAO.createNode(battery.getNodeId());
-//        }
-        datamineDAO.insertData(battery);
+    boolean persist(DatamineEntity entity) {
+        Node node = nodeRepository.findOne(entity.getNodeId());
+        if (node == null) {
+            node = new Node();
+            node.setId(entity.getNodeId());
+            nodeRepository.save(node);
+        }
+        DatamineCrudRepository<DatamineEntity> repository = repositoriesService.getRepository(entity);
+        repository.getPrevious(entity);
         return true;
     }
 

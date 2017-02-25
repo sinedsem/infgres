@@ -1,11 +1,8 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.AgentReport;
-import com.github.sinedsem.infgres.datamodel.datamine.Continuous;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.repository.RequestHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -15,12 +12,14 @@ public class ReportProcessor {
 
 
     private final PersisterService persisterService;
-    private final RequestHistoryRepository requestHistoryRepository;
+//    private final AgentReportRepository agentReportRepository;
+    private final RepositoriesService repositoriesService;
 
     @Autowired
-    public ReportProcessor(PersisterService persisterService, @Qualifier("requestHistoryRepository") RequestHistoryRepository requestHistoryRepository) {
+    public ReportProcessor(PersisterService persisterService, RepositoriesService repositoriesService) {
         this.persisterService = persisterService;
-        this.requestHistoryRepository = requestHistoryRepository;
+//        this.agentReportRepository = agentReportRepository;
+        this.repositoriesService = repositoriesService;
     }
 
     public void logRequestHistory(AgentReport agentReport) {
@@ -28,19 +27,14 @@ public class ReportProcessor {
             agentReport.setRequestHistoryId(UUID.randomUUID());
         }
 
-        UUID requestHistoryId = agentReport.getRequestHistoryId();
-
-        UUID previousRequestHistoryId = getOptionalPreviousRequestHistoryId(agentReport, requestHistoryId);
-
-    }
-
-    private UUID getOptionalPreviousRequestHistoryId(AgentReport agentReport, UUID requestHistoryId) {
         for (DatamineEntity datamineEntity : agentReport.getEntities()) {
-            if (datamineEntity instanceof Continuous) {
-//                return requestHistoryRepository.getPreviousRequestHistoryId();
-            }
+            datamineEntity.setEndTime(agentReport.getEndTime());
+            datamineEntity.setStartTime(agentReport.getStartTime());
+            datamineEntity.setRequestId(agentReport.getRequestHistoryId());
+            persisterService.persist(datamineEntity);
         }
-        return null;
+
     }
+
 
 }

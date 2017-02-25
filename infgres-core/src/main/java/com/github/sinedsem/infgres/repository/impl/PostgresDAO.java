@@ -19,7 +19,7 @@ public class PostgresDAO implements DatamineDAO {
     protected final JdbcTemplate jdbcTemplate;
 //
 //    @Autowired
-//    private BatteryRepository batteryRepository;
+//    private BatteryRepositoryCustom batteryRepository;
 
     public PostgresDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

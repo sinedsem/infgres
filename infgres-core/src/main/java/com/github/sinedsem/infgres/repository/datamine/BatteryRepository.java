@@ -1,7 +1,6 @@
 package com.github.sinedsem.infgres.repository.datamine;
 
-//@Repository
-//public interface BatteryRepository extends CrudRepository<Battery, UUID> {
-public interface BatteryRepository {
+import com.github.sinedsem.infgres.datamodel.datamine.Battery;
 
+public interface BatteryRepository extends DatamineCrudRepository<Battery> {
 }

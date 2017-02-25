@@ -3,18 +3,32 @@ package com.github.sinedsem.infgres.datamodel.datamine;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "datamineType")
 @JsonSubTypes({@JsonSubTypes.Type(value = Battery.class)})
+@MappedSuperclass
 public abstract class DatamineEntity {
 
+    @Id
+    @Column(name = "f_id")
     private UUID id = UUID.randomUUID();
+
+    @Column(name = "f_node_id")
     private UUID nodeId;
-    private UUID requestHistoryId;
+
+    @Column(name = "f_request_id")
+    private UUID requestId;
+
+    @Column(name = "f_starttime")
     private long startTime;
+
+    @Column(name = "f_endtime")
     private long endTime;
 
     public UUID getId() {
@@ -33,12 +47,12 @@ public abstract class DatamineEntity {
         this.nodeId = nodeId;
     }
 
-    public UUID getRequestHistoryId() {
-        return requestHistoryId;
+    public UUID getRequestId() {
+        return requestId;
     }
 
-    public void setRequestHistoryId(UUID requestHistoryId) {
-        this.requestHistoryId = requestHistoryId;
+    public void setRequestId(UUID requestId) {
+        this.requestId = requestId;
     }
 
     public long getStartTime() {
