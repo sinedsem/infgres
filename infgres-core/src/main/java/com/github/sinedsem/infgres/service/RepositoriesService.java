@@ -21,16 +21,4 @@ public class RepositoriesService {
         //noinspection unchecked
         return (DatamineCrudRepository<T>) repositories.getRepositoryFor(entity.getClass());
     }
-
-    public Object save(DatamineEntity entity) {
-        return getRepository(entity).save(entity);
-    }
-
-    public Object findAll(DatamineEntity entity) {
-        return getRepository(entity).findAll();
-    }
-
-    public void delete(DatamineEntity entity) {
-        getRepository(entity).delete(entity);
-    }
 }

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class PersisterService {
 
-
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
 
@@ -29,6 +28,7 @@ public class PersisterService {
         }
         DatamineCrudRepository<DatamineEntity> repository = repositoriesService.getRepository(entity);
         repository.getPrevious(entity);
+        repository.save(entity);
         return true;
     }
 

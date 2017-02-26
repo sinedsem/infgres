@@ -10,16 +10,11 @@ import java.util.UUID;
 @Service
 public class ReportProcessor {
 
-
     private final PersisterService persisterService;
-//    private final AgentReportRepository agentReportRepository;
-    private final RepositoriesService repositoriesService;
 
     @Autowired
-    public ReportProcessor(PersisterService persisterService, RepositoriesService repositoriesService) {
+    public ReportProcessor(PersisterService persisterService) {
         this.persisterService = persisterService;
-//        this.agentReportRepository = agentReportRepository;
-        this.repositoriesService = repositoriesService;
     }
 
     public void logRequestHistory(AgentReport agentReport) {
@@ -35,6 +30,4 @@ public class ReportProcessor {
         }
 
     }
-
-
 }

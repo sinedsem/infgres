@@ -1,9 +1,7 @@
 package com.github.sinedsem.infgres.resource;
 
 import com.github.sinedsem.infgres.datamodel.AgentReport;
-import com.github.sinedsem.infgres.datamodel.datamine.Battery;
 import com.github.sinedsem.infgres.datamodel.datamine.Continuous;
-import com.github.sinedsem.infgres.service.PersisterService;
 import com.github.sinedsem.infgres.service.ReportProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,30 +10,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+//todo: all this class
+
 @Controller
 @RequestMapping("/listener")
 public class ListenerController {
 
-
-    private final PersisterService persisterService;
     private final ReportProcessor reportProcessor;
 
     @Autowired
-    public ListenerController(PersisterService persisterService, ReportProcessor reportProcessor) {
-        this.persisterService = persisterService;
+    public ListenerController(ReportProcessor reportProcessor) {
         this.reportProcessor = reportProcessor;
-    }
-
-    @RequestMapping(value = "/battery", method = RequestMethod.POST)
-    @ResponseBody
-    boolean persistBattery(@RequestBody Battery battery) {
-        return false;
-//        return persisterService.persist(battery);
     }
 
     @RequestMapping(value = "/report", method = RequestMethod.POST)
     @ResponseBody
     boolean report(@RequestBody AgentReport agentReport) {
+
         reportProcessor.logRequestHistory(agentReport);
         return agentReport instanceof Continuous;
 //        return persisterService.persist(battery);

@@ -7,5 +7,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.util.UUID;
 
 @NoRepositoryBean
-public interface DatamineCrudRepository<T extends DatamineEntity> extends DatamineRepository<T>, CrudRepository<T, UUID> {
+public interface DatamineCrudRepository<T extends DatamineEntity> extends CrudRepository<T, UUID> {
+
+    void getPrevious(T entity);
+
 }
