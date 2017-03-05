@@ -1,8 +1,10 @@
 package com.github.sinedsem.infgres.config;
 
-import com.github.sinedsem.infgres.datamodel.datamine.Battery;
-import com.github.sinedsem.infgres.repository.impl.InfluxPostgresRepositoryImpl;
-import com.github.sinedsem.infgres.repository.impl.PostgresRepositoryImpl;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
+import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
+import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
+import com.github.sinedsem.infgres.repository.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,17 +19,30 @@ public class Repositories {
     @Value("${influx}")
     private boolean influx;
 
-    @Bean(name = "batteryRepositoryImpl")
+    @Bean
     @Autowired
-    public PostgresRepositoryImpl<Battery> batteryRepositoryImpl(EntityManager entityManager) {
-        return getImplementation(entityManager, Battery.class);
+    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager) {
+        return getContinuousImplementation(entityManager, DiskStatus.class);
     }
 
-    private PostgresRepositoryImpl<Battery> getImplementation(EntityManager entityManager, Class<Battery> clazz) {
+    @Bean
+    @Autowired
+    public AbstractRepositoryImpl<BackupJob> backupJobRepositoryImpl(EntityManager entityManager) {
+        return getEventImplementation(entityManager, BackupJob.class);
+    }
+
+    private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz) {
         if (influx) {
-            return new InfluxPostgresRepositoryImpl<>(clazz, entityManager);
+            return new InfluxContinuousRepositoryImpl<>(clazz, entityManager);
         }
-        return new PostgresRepositoryImpl<>(clazz, entityManager);
+        return new PostgresContinuousRepositoryImpl<>(clazz, entityManager);
+    }
+
+    private <T extends EventDatamineEntity> AbstractRepositoryImpl<T> getEventImplementation(EntityManager entityManager, Class<T> clazz) {
+        if (influx) {
+            return new InfluxEventRepositoryImpl<>(clazz, entityManager);
+        }
+        return new PostgresEventRepositoryImpl<>(clazz, entityManager);
     }
 
 

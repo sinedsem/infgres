@@ -1,9 +1,12 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.Node;
+import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
+import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.NodeRepository;
-import com.github.sinedsem.infgres.repository.datamine.DatamineCrudRepository;
+import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
+import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +23,40 @@ public class PersisterService {
     }
 
     boolean persist(DatamineEntity entity) {
+        if (entity instanceof ContinuousDatamineEntity) {
+            return persist((ContinuousDatamineEntity) entity);
+        } else if (entity instanceof EventDatamineEntity) {
+            return persist((EventDatamineEntity) entity);
+        }
+        return false;
+    }
+
+    boolean persist(ContinuousDatamineEntity entity) {
+        createNodeIfNotExists(entity);
+
+        ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
+
+        repository.getPrevious(entity);
+        repository.save(entity);
+        return true;
+    }
+
+    boolean persist(EventDatamineEntity entity) {
+        createNodeIfNotExists(entity);
+
+        EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
+
+        repository.save(entity);
+        return true;
+    }
+
+    private void createNodeIfNotExists(DatamineEntity entity) {
         Node node = nodeRepository.findOne(entity.getNodeId());
         if (node == null) {
             node = new Node();
             node.setId(entity.getNodeId());
             nodeRepository.save(node);
         }
-        DatamineCrudRepository<DatamineEntity> repository = repositoriesService.getRepository(entity);
-        repository.getPrevious(entity);
-        repository.save(entity);
-        return true;
     }
 
 }

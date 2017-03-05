@@ -11,7 +11,10 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "datamineType")
-@JsonSubTypes({@JsonSubTypes.Type(value = Battery.class)})
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DiskStatus.class),
+        @JsonSubTypes.Type(value = BackupJob.class)
+})
 @MappedSuperclass
 public abstract class DatamineEntity {
 

@@ -1,4 +1,4 @@
 package com.github.sinedsem.infgres.datamodel.datamine;
 
-public interface Continuous {
+public class EventDatamineEntity extends DatamineEntity {
 }

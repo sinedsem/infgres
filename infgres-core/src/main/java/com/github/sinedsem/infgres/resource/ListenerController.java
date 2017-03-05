@@ -1,7 +1,6 @@
 package com.github.sinedsem.infgres.resource;
 
 import com.github.sinedsem.infgres.datamodel.AgentReport;
-import com.github.sinedsem.infgres.datamodel.datamine.Continuous;
 import com.github.sinedsem.infgres.service.ReportProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,7 +27,7 @@ public class ListenerController {
     boolean report(@RequestBody AgentReport agentReport) {
 
         reportProcessor.logRequestHistory(agentReport);
-        return agentReport instanceof Continuous;
+        return true;
 //        return persisterService.persist(battery);
     }
 /*

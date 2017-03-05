@@ -1,14 +1,13 @@
 package com.github.sinedsem.infgres.repository.datamine;
 
-import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
+import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.UUID;
 
 @NoRepositoryBean
-public interface DatamineCrudRepository<T extends DatamineEntity> extends CrudRepository<T, UUID> {
+public interface EventRepository<T extends EventDatamineEntity> extends CrudRepository<T, UUID> {
 
-    void getPrevious(T entity);
 
 }

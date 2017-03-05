@@ -1,7 +1,9 @@
 package com.github.sinedsem.infgres.service;
 
-import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.repository.datamine.DatamineCrudRepository;
+import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
+import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
+import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
+import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.support.Repositories;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,13 @@ public class RepositoriesService {
         repositories = new Repositories(appContext);
     }
 
-    <T extends DatamineEntity> DatamineCrudRepository<T> getRepository(T entity) {
+    <T extends ContinuousDatamineEntity> ContinuousRepository<T> getRepository(T entity) {
         //noinspection unchecked
-        return (DatamineCrudRepository<T>) repositories.getRepositoryFor(entity.getClass());
+        return (ContinuousRepository<T>) repositories.getRepositoryFor(entity.getClass());
+    }
+
+    <T extends EventDatamineEntity> EventRepository<T> getRepository(T entity) {
+        //noinspection unchecked
+        return (EventRepository<T>) repositories.getRepositoryFor(entity.getClass());
     }
 }
