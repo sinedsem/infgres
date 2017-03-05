@@ -9,6 +9,7 @@ import java.util.UUID;
 @NoRepositoryBean
 public interface ContinuousRepository<T extends ContinuousDatamineEntity> extends CrudRepository<T, UUID> {
 
-    void getPrevious(T entity);
+    T getPrevious(T entity);
 
+    T getNext(T entity);
 }

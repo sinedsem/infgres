@@ -14,11 +14,11 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
     }
 
     @Override
-    public void getPrevious(T entity) {
+    public T getPrevious(T entity) {
 
         @SuppressWarnings("JpaQlInspection")
         String sql = "SELECT e FROM " + getDomainClass().getSimpleName() + " e WHERE e.startTime <= :startTime AND " +
-                "e.nodeId = :nodeId" + entity.getCriteria();
+                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime DESC LIMIT 1";
 
         Query query = entityManager.createQuery(sql);
         query.setParameter("startTime", entity.getStartTime());
@@ -26,9 +26,32 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
         entity.setParameters(query);
 
 
-        List resultList = query.getResultList();
-        for (Object o : resultList) {
-            System.out.println(o);
+        @SuppressWarnings("unchecked")
+        List<T> resultList = query.getResultList();
+        if (!resultList.isEmpty()) {
+            return resultList.get(0);
         }
+        return null;
+    }
+
+    @Override
+    public T getNext(T entity) {
+
+        @SuppressWarnings("JpaQlInspection")
+        String sql = "SELECT e FROM " + getDomainClass().getSimpleName() + " e WHERE e.startTime > :startTime AND " +
+                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime LIMIT 1";
+
+        Query query = entityManager.createQuery(sql);
+        query.setParameter("startTime", entity.getStartTime());
+        query.setParameter("nodeId", entity.getStartTime());
+        entity.setParameters(query);
+
+
+        @SuppressWarnings("unchecked")
+        List<T> resultList = query.getResultList();
+        if (!resultList.isEmpty()) {
+            return resultList.get(0);
+        }
+        return null;
     }
 }

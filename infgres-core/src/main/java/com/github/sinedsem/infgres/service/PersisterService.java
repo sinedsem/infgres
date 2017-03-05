@@ -36,8 +36,26 @@ public class PersisterService {
 
         ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
 
-        repository.getPrevious(entity);
-        repository.save(entity);
+        ContinuousDatamineEntity previous = repository.getPrevious(entity);
+
+        if (previous != null && previous.equals(entity) && previous.getEndTime() >= entity.getStartTime()) {
+            previous.setEndTime(entity.getEndTime());
+            previous.setRequestId(entity.getRequestId());
+            repository.save(previous);
+            entity = previous;
+        } else {
+            repository.save(entity);
+        }
+
+        ContinuousDatamineEntity next = repository.getNext(entity);
+
+        if (next != null && next.equals(entity) && next.getStartTime() <= entity.getEndTime()) {
+            next.setRequestId(entity.getRequestId());
+            next.setStartTime(entity.getStartTime());
+            repository.delete(entity);
+            repository.save(next);
+        }
+
         return true;
     }
 
