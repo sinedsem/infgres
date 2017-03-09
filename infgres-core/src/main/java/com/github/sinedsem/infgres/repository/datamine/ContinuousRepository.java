@@ -1,6 +1,7 @@
 package com.github.sinedsem.infgres.repository.datamine;
 
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 

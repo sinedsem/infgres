@@ -18,12 +18,13 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
 
         @SuppressWarnings("JpaQlInspection")
         String sql = "SELECT e FROM " + getDomainClass().getSimpleName() + " e WHERE e.startTime <= :startTime AND " +
-                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime DESC LIMIT 1";
+                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime DESC";
 
         Query query = entityManager.createQuery(sql);
         query.setParameter("startTime", entity.getStartTime());
-        query.setParameter("nodeId", entity.getStartTime());
+        query.setParameter("nodeId", entity.getNodeId());
         entity.setParameters(query);
+        query.setMaxResults(1);
 
 
         @SuppressWarnings("unchecked")
@@ -39,12 +40,13 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
 
         @SuppressWarnings("JpaQlInspection")
         String sql = "SELECT e FROM " + getDomainClass().getSimpleName() + " e WHERE e.startTime > :startTime AND " +
-                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime LIMIT 1";
+                "e.nodeId = :nodeId" + entity.getCriteria() + " ORDER BY e.startTime";
 
         Query query = entityManager.createQuery(sql);
         query.setParameter("startTime", entity.getStartTime());
-        query.setParameter("nodeId", entity.getStartTime());
+        query.setParameter("nodeId", entity.getNodeId());
         entity.setParameters(query);
+        query.setMaxResults(1);
 
 
         @SuppressWarnings("unchecked")

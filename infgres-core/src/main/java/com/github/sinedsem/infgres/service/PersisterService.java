@@ -68,7 +68,7 @@ public class PersisterService {
         return true;
     }
 
-    private void createNodeIfNotExists(DatamineEntity entity) {
+    void createNodeIfNotExists(DatamineEntity entity) {
         Node node = nodeRepository.findOne(entity.getNodeId());
         if (node == null) {
             node = new Node();

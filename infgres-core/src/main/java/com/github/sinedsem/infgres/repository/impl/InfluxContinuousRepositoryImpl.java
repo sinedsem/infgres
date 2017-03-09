@@ -12,7 +12,12 @@ public class InfluxContinuousRepositoryImpl<T extends ContinuousDatamineEntity> 
     }
 
     @Override
-    public void getPrevious(T entity) {
+    public T getPrevious(T entity) {
+        return null;
+    }
 
+    @Override
+    public T getNext(T entity) {
+        return null;
     }
 }
