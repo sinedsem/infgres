@@ -73,4 +73,6 @@ public abstract class DatamineEntity {
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
+
+    public abstract String getInfluxMeasurement();
 }

@@ -1,5 +1,7 @@
 package com.github.sinedsem.infgres.datamodel.datamine;
 
+import org.influxdb.dto.Point;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Query;
@@ -48,8 +50,15 @@ public class DiskStatus extends ContinuousDatamineEntity {
     }
 
     @Override
-    public void setParameters(Query query) {
+    public void setPostgresParameters(Query query) {
         query.setParameter("number", number);
+    }
+
+    @Override
+    public void setInfluxTagsAndFields(Point.Builder builder) {
+        builder.tag("number", String.valueOf(number));
+        builder.addField("totalSpace", totalSpace);
+        builder.addField("usedSpace", usedSpace);
     }
 
     @Override
@@ -70,5 +79,10 @@ public class DiskStatus extends ContinuousDatamineEntity {
         result = 31 * result + (int) (totalSpace ^ (totalSpace >>> 32));
         result = 31 * result + (int) (usedSpace ^ (usedSpace >>> 32));
         return result;
+    }
+
+    @Override
+    public String getInfluxMeasurement() {
+        return "disk_status";
     }
 }

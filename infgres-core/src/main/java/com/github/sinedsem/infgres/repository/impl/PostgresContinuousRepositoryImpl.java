@@ -23,7 +23,7 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
         Query query = entityManager.createQuery(sql);
         query.setParameter("startTime", entity.getStartTime());
         query.setParameter("nodeId", entity.getNodeId());
-        entity.setParameters(query);
+        entity.setPostgresParameters(query);
         query.setMaxResults(1);
 
 
@@ -45,7 +45,7 @@ public class PostgresContinuousRepositoryImpl<T extends ContinuousDatamineEntity
         Query query = entityManager.createQuery(sql);
         query.setParameter("startTime", entity.getStartTime());
         query.setParameter("nodeId", entity.getNodeId());
-        entity.setParameters(query);
+        entity.setPostgresParameters(query);
         query.setMaxResults(1);
 
 

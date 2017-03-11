@@ -5,6 +5,8 @@ import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.impl.*;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +22,17 @@ public class Repositories {
     private boolean influx;
 
     @Bean
+    public InfluxDB influxDB() {
+        if (influx) {
+            return InfluxDBFactory.connect("http://127.0.0.1:8086", "root", "root");
+        }
+        return null;
+    }
+
+    @Bean
     @Autowired
-    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager) {
-        return getContinuousImplementation(entityManager, DiskStatus.class);
+    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager, InfluxDB influxDB) {
+        return getContinuousImplementation(entityManager, DiskStatus.class, influxDB);
     }
 
     @Bean
@@ -31,9 +41,9 @@ public class Repositories {
         return getEventImplementation(entityManager, BackupJob.class);
     }
 
-    private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz) {
+    private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz, InfluxDB influxDB) {
         if (influx) {
-            return new InfluxContinuousRepositoryImpl<>(clazz, entityManager);
+            return new InfluxContinuousRepositoryImpl<>(clazz, entityManager, influxDB);
         }
         return new PostgresContinuousRepositoryImpl<>(clazz, entityManager);
     }

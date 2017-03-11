@@ -63,4 +63,9 @@ public class BackupJob extends EventDatamineEntity {
     public void setPath(String path) {
         this.path = path;
     }
+
+    @Override
+    public String getInfluxMeasurement() {
+        return "backup_job";
+    }
 }
