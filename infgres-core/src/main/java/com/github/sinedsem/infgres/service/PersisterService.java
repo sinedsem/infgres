@@ -10,6 +10,8 @@ import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class PersisterService {
 
@@ -31,6 +33,7 @@ public class PersisterService {
         return false;
     }
 
+    @Transactional
     boolean persist(ContinuousDatamineEntity entity) {
         createNodeIfNotExists(entity);
 
@@ -38,22 +41,41 @@ public class PersisterService {
 
         ContinuousDatamineEntity previous = repository.getPrevious(entity);
 
-        if (previous != null && previous.equals(entity) && previous.getEndTime() >= entity.getStartTime()) {
-            previous.setEndTime(entity.getEndTime());
-            previous.setRequestId(entity.getRequestId());
-            repository.save(previous);
-            entity = previous;
+        if (previous != null && previous.getEndTime() >= entity.getStartTime()) {
+            if (previous.equals(entity)) {
+                previous.setEndTime(entity.getEndTime());
+                previous.setRequestId(entity.getRequestId());
+                repository.save(previous);
+                entity = previous;
+            } else {
+                previous.setEndTime(entity.getStartTime() - 1);
+                if (previous.getStartTime() >= previous.getEndTime()) {
+                    entity.setId(previous.getId());
+                } else {
+                    repository.save(previous);
+                }
+                repository.save(entity);
+            }
         } else {
             repository.save(entity);
         }
 
         ContinuousDatamineEntity next = repository.getNext(entity);
 
-        if (next != null && next.equals(entity) && next.getStartTime() <= entity.getEndTime()) {
-            next.setRequestId(entity.getRequestId());
-            next.setStartTime(entity.getStartTime());
-            repository.delete(entity);
-            repository.save(next);
+        if (next != null && next.getStartTime() <= entity.getEndTime()) {
+            if (next.equals(entity)) {
+                next.setRequestId(entity.getRequestId());
+                next.setStartTime(entity.getStartTime());
+                repository.delete(entity);
+                repository.save(next);
+            } else {
+                entity.setEndTime(next.getStartTime() - 1);
+                if (entity.getStartTime() >= entity.getEndTime()) {
+                    repository.delete(entity);
+                } else {
+                    repository.save(entity);
+                }
+            }
         }
 
         return true;

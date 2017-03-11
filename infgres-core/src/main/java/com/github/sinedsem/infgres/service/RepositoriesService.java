@@ -19,9 +19,9 @@ public class RepositoriesService {
         repositories = new Repositories(appContext);
     }
 
-    <T extends ContinuousDatamineEntity> ContinuousRepository<T> getRepository(T entity) {
+    ContinuousRepository getRepository(ContinuousDatamineEntity entity) {
         //noinspection unchecked
-        return (ContinuousRepository<T>) repositories.getRepositoryFor(entity.getClass());
+        return (ContinuousRepository) repositories.getRepositoryFor(entity.getClass());
     }
 
     <T extends EventDatamineEntity> EventRepository<T> getRepository(T entity) {
