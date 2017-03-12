@@ -2,10 +2,12 @@ package com.github.sinedsem.infgres.datamodel.datamine;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.influxdb.dto.Point;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Query;
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
@@ -72,6 +74,16 @@ public abstract class DatamineEntity {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
+    }
+
+    public String getCriteria() {
+        return "";
+    }
+
+    public void setPostgresParameters(Query query) {
+    }
+
+    public void setInfluxTagsAndFields(Point.Builder builder) {
     }
 
     public abstract String getInfluxMeasurement();

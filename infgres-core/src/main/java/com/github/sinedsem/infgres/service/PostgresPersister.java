@@ -8,22 +8,18 @@ import com.github.sinedsem.infgres.repository.NodeRepository;
 import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
 import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
 @Service
-public class PersisterService {
-
-    @Value("${influx}")
-    private boolean influx;
+public class PostgresPersister {
 
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
 
     @Autowired
-    public PersisterService(RepositoriesService repositoriesService, NodeRepository nodeRepository) {
+    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository) {
         this.repositoriesService = repositoriesService;
         this.nodeRepository = nodeRepository;
     }
@@ -40,54 +36,50 @@ public class PersisterService {
     @Transactional
     boolean persist(ContinuousDatamineEntity entity) {
         createNodeIfNotExists(entity);
-        if (false) {
-//            ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
-            return true;
-        } else {
 
-            ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
+        @SuppressWarnings("unchecked")
+        ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
 
-            ContinuousDatamineEntity previous = repository.getPrevious(entity);
+        ContinuousDatamineEntity previous = repository.getPrevious(entity);
 
-            if (previous != null && previous.getEndTime() >= entity.getStartTime()) {
-                if (previous.equals(entity)) {
-                    previous.setEndTime(entity.getEndTime());
-                    previous.setRequestId(entity.getRequestId());
-                    repository.save(previous);
-                    entity = previous;
-                } else {
-                    previous.setEndTime(entity.getStartTime() - 1);
-                    if (previous.getStartTime() >= previous.getEndTime()) {
-                        entity.setId(previous.getId());
-                    } else {
-                        repository.save(previous);
-                    }
-                    repository.save(entity);
-                }
+        if (previous != null && previous.getEndTime() >= entity.getStartTime()) {
+            if (previous.equals(entity)) {
+                previous.setEndTime(entity.getEndTime());
+                previous.setRequestId(entity.getRequestId());
+                repository.save(previous);
+                entity = previous;
             } else {
+                previous.setEndTime(entity.getStartTime() - 1);
+                if (previous.getStartTime() >= previous.getEndTime()) {
+                    entity.setId(previous.getId());
+                } else {
+                    repository.save(previous);
+                }
                 repository.save(entity);
             }
+        } else {
+            repository.save(entity);
+        }
 
-            ContinuousDatamineEntity next = repository.getNext(entity);
+        ContinuousDatamineEntity next = repository.getNext(entity);
 
-            if (next != null && next.getStartTime() <= entity.getEndTime()) {
-                if (next.equals(entity)) {
-                    next.setRequestId(entity.getRequestId());
-                    next.setStartTime(entity.getStartTime());
+        if (next != null && next.getStartTime() <= entity.getEndTime()) {
+            if (next.equals(entity)) {
+                next.setRequestId(entity.getRequestId());
+                next.setStartTime(entity.getStartTime());
+                repository.delete(entity);
+                repository.save(next);
+            } else {
+                entity.setEndTime(next.getStartTime() - 1);
+                if (entity.getStartTime() >= entity.getEndTime()) {
                     repository.delete(entity);
-                    repository.save(next);
                 } else {
-                    entity.setEndTime(next.getStartTime() - 1);
-                    if (entity.getStartTime() >= entity.getEndTime()) {
-                        repository.delete(entity);
-                    } else {
-                        repository.save(entity);
-                    }
+                    repository.save(entity);
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     boolean persist(EventDatamineEntity entity) {

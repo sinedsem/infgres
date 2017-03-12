@@ -1,7 +1,6 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
-import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
 import com.github.sinedsem.infgres.repository.datamine.DiskStatusRepository;
 import com.google.common.collect.Lists;
 import org.junit.After;
@@ -11,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -20,13 +20,14 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ContinuousPersisterTest {
+@TestPropertySource(locations="classpath:test.properties")
+public class PostgresContinuousPersisterTest {
 
     @Autowired
     private RepositoriesService repositoriesService;
 
     @Autowired
-    private PersisterService persisterService;
+    private PostgresPersister postgresPersister;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -54,12 +55,12 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(20);
         entity.setEndTime(40);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());
@@ -85,12 +86,12 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(10);
         entity.setEndTime(30);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());
@@ -115,13 +116,13 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(20);
         entity.setEndTime(40);
         entity.setUsedSpace(60);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());
@@ -149,13 +150,13 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(10);
         entity.setEndTime(30);
         entity.setUsedSpace(60);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());
@@ -183,13 +184,13 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(10);
         entity.setEndTime(20);
         entity.setUsedSpace(60);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());
@@ -213,19 +214,19 @@ public class ContinuousPersisterTest {
         entity.setTotalSpace(100);
         entity.setUsedSpace(50);
         entity.setNodeId(nodeId);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(40);
         entity.setEndTime(60);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         UUID secondId = entity.getId();
 
         entity.setId(UUID.randomUUID());
         entity.setStartTime(20);
         entity.setEndTime(40);
-        persisterService.persist(entity);
+        postgresPersister.persist(entity);
 
         DiskStatusRepository repository = (DiskStatusRepository) repositoriesService.getRepository(entity);
         ArrayList<DiskStatus> list = Lists.newArrayList(repository.findByOrderByStartTime());

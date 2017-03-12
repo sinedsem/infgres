@@ -31,8 +31,8 @@ public class Repositories {
 
     @Bean
     @Autowired
-    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager, InfluxDB influxDB) {
-        return getContinuousImplementation(entityManager, DiskStatus.class, influxDB);
+    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager) {
+        return getContinuousImplementation(entityManager, DiskStatus.class);
     }
 
     @Bean
@@ -41,17 +41,11 @@ public class Repositories {
         return getEventImplementation(entityManager, BackupJob.class);
     }
 
-    private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz, InfluxDB influxDB) {
-        if (influx) {
-            return new InfluxContinuousRepositoryImpl<>(clazz, entityManager, influxDB);
-        }
+    private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz) {
         return new PostgresContinuousRepositoryImpl<>(clazz, entityManager);
     }
 
     private <T extends EventDatamineEntity> AbstractRepositoryImpl<T> getEventImplementation(EntityManager entityManager, Class<T> clazz) {
-        if (influx) {
-            return new InfluxEventRepositoryImpl<>(clazz, entityManager);
-        }
         return new PostgresEventRepositoryImpl<>(clazz, entityManager);
     }
 
