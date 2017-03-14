@@ -25,8 +25,9 @@ public class ListenerController {
     @RequestMapping(value = "/report", method = RequestMethod.POST)
     @ResponseBody
     boolean report(@RequestBody AgentReport agentReport) {
-
+//        System.out.println("received report");
         reportProcessor.logRequestHistory(agentReport);
+//        System.out.println("returning true");
         return true;
 //        return persisterService.persist(battery);
     }

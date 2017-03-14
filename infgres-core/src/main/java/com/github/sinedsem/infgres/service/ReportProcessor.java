@@ -24,8 +24,8 @@ public class ReportProcessor {
     }
 
     public void logRequestHistory(AgentReport agentReport) {
-        if (agentReport.getRequestHistoryId() == null) {
-            agentReport.setRequestHistoryId(UUID.randomUUID());
+        if (agentReport.getId() == null) {
+            agentReport.setId(UUID.randomUUID());
         }
 
         if (influx) {
@@ -39,7 +39,7 @@ public class ReportProcessor {
         for (DatamineEntity datamineEntity : agentReport.getEntities()) {
             datamineEntity.setEndTime(agentReport.getEndTime());
             datamineEntity.setStartTime(agentReport.getStartTime());
-            datamineEntity.setRequestId(agentReport.getRequestHistoryId());
+            datamineEntity.setRequestId(agentReport.getId());
             postgresPersister.persist(datamineEntity);
         }
     }

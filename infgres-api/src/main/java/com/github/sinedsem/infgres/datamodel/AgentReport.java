@@ -13,16 +13,10 @@ public class AgentReport {
 
     @Column(name = "f_id")
     @Id
-    private UUID requestHistoryId;
+    private UUID id;
 
     @Transient
     private List<DatamineEntity> entities = new ArrayList<>();
-
-    @Column(name = "f_function")
-    private String function;
-
-    @Column(name = "f_module")
-    private String module;
 
     @Column(name = "f_starttime")
     private long startTime;
@@ -30,12 +24,12 @@ public class AgentReport {
     @Column(name = "f_endtime")
     private long endTime;
 
-    public UUID getRequestHistoryId() {
-        return requestHistoryId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setRequestHistoryId(UUID requestHistoryId) {
-        this.requestHistoryId = requestHistoryId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public List<DatamineEntity> getEntities() {
@@ -44,22 +38,6 @@ public class AgentReport {
 
     public void setEntities(List<DatamineEntity> entities) {
         this.entities = entities;
-    }
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public String getModule() {
-        return module;
-    }
-
-    public void setModule(String module) {
-        this.module = module;
     }
 
     public long getStartTime() {

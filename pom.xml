@@ -12,6 +12,7 @@
     <modules>
         <module>infgres-core</module>
         <module>infgres-webapp</module>
+        <module>infgres-api</module>
     </modules>
 
     <dependencies>
@@ -32,6 +33,16 @@
         </dependency>
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.influxdb</groupId>
+                <artifactId>influxdb-java</artifactId>
+                <version>2.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
