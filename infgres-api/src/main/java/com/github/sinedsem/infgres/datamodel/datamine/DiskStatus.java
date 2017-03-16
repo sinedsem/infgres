@@ -20,6 +20,16 @@ public class DiskStatus extends ContinuousDatamineEntity {
     @Column(name = "f_used_space")
     private long usedSpace;
 
+    public DiskStatus() {
+    }
+
+    public DiskStatus(DiskStatus diskStatus) {
+        super(diskStatus);
+        this.number = diskStatus.number;
+        this.totalSpace = diskStatus.totalSpace;
+        this.usedSpace = diskStatus.usedSpace;
+    }
+
     public int getNumber() {
         return number;
     }

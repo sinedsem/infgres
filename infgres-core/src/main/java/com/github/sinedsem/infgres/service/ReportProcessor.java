@@ -45,6 +45,11 @@ public class ReportProcessor {
     }
 
     private void persistInflux(AgentReport agentReport) {
+
+//        for (DatamineEntity entity : agentReport.getEntities()) {
+//            entity.setRequestId(agentReport.getId());
+//            influxPersister.persist(entity);
+//        }
         influxPersister.persist(agentReport);
     }
 

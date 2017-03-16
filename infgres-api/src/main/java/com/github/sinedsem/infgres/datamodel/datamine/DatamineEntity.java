@@ -36,6 +36,16 @@ public abstract class DatamineEntity {
     @Column(name = "f_endtime")
     private long endTime;
 
+    public DatamineEntity() {
+    }
+
+    public DatamineEntity(DatamineEntity entity) {
+        this.startTime = entity.startTime;
+        this.endTime = entity.endTime;
+        this.nodeId = entity.nodeId;
+        this.requestId = entity.requestId;
+    }
+
     public UUID getId() {
         return id;
     }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -50,15 +51,40 @@ public class PusherService {
 
         });
 
+
+        List<DatamineEntity> result = new ArrayList<>(10000);
+
         for (DatamineEntity entity : list) {
             long realEndTime = entity.getEndTime();
+            long startTime = entity.getStartTime();
 
-            while (entity.getStartTime() + interval <= realEndTime) {
-                entity.setEndTime(entity.getStartTime() + interval * 2);
-                pushOne(entity);
-                entity.setStartTime(entity.getStartTime() + interval);
+            while (startTime + interval <= realEndTime) {
+                DatamineEntity diskStatus = new DiskStatus((DiskStatus) entity);
+                diskStatus.setEndTime(startTime + interval * 2);
+                diskStatus.setStartTime(startTime);
+
+                result.add(diskStatus);
+                startTime = startTime + interval;
             }
         }
+
+        System.out.println("pushing " + result.size());
+
+        int batchSize = 10;
+
+        for (int i = 0; i < result.size(); i += batchSize) {
+            List<DatamineEntity> batch = new ArrayList<>(batchSize);
+            for (int j = 0; j < batchSize && i + j < result.size(); j++) {
+                batch.add(result.get(i + j));
+            }
+            new Thread(() -> pushAll(batch)).start();
+        }
+
+//        for (DatamineEntity entity : result) {
+//            new Thread(() -> pushOne(entity)).start();
+//        }
+
+//        pushAll(result);
 
     }
 
@@ -68,8 +94,31 @@ public class PusherService {
         agentReport.setId(null);
 
         agentReport.getEntities().add(entity);
-        agentReport.setStartTime(entity.getStartTime());
-        agentReport.setEndTime(entity.getEndTime());
+//        agentReport.setStartTime(entity.getStartTime());
+//        agentReport.setEndTime(entity.getEndTime());
+
+        HttpPost request = new HttpPost("http://localhost:9010/listener/report");
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity(objectToJson(agentReport), "utf-8"));
+
+//        System.out.println("sending report " + entity.getStartTime() + "-"+  entity.getEndTime());
+
+        try {
+            CloseableHttpResponse response = httpClient.execute(request);
+            response.close();
+//            System.out.println(response.getStatusLine());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void pushAll(Collection<? extends DatamineEntity> entities) {
+
+        AgentReport agentReport = new AgentReport();
+        agentReport.setId(null);
+
+        agentReport.getEntities().addAll(entities);
 
         HttpPost request = new HttpPost("http://localhost:9010/listener/report");
         request.setHeader("Content-Type", "application/json");
