@@ -1,14 +1,12 @@
 package com.github.sinedsem.infgres.resource;
 
+import com.github.sinedsem.infgres.config.Repositories;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.service.ReportProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,13 +20,16 @@ public class ListenerController {
     private final AtomicInteger requestCounter;
 
     private final ReportProcessor reportProcessor;
+    private final Repositories repositories;
+
 
     @Autowired
-    public ListenerController(ReportProcessor reportProcessor, @Qualifier("startTime") AtomicLong startTime, @Qualifier("endTime") AtomicLong endTime, AtomicInteger requestCounter) {
+    public ListenerController(ReportProcessor reportProcessor, @Qualifier("startTime") AtomicLong startTime, @Qualifier("endTime") AtomicLong endTime, AtomicInteger requestCounter, @Qualifier("repositories") Repositories repositories) {
         this.reportProcessor = reportProcessor;
         this.startTime = startTime;
         this.endTime = endTime;
         this.requestCounter = requestCounter;
+        this.repositories = repositories;
     }
 
     @RequestMapping(value = "/report", method = RequestMethod.POST)
@@ -55,6 +56,13 @@ public class ListenerController {
             return endTime.get() - startTime.get();
         }
         return -1;
+    }
+
+    @RequestMapping(value = "/setDb", method = RequestMethod.GET)
+    @ResponseBody
+    boolean setDb(@RequestParam(defaultValue = "true") Boolean influx) {
+        repositories.setInflux(influx);
+        return influx;
     }
 
 

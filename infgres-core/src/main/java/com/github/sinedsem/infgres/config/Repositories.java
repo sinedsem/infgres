@@ -4,7 +4,9 @@ import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
-import com.github.sinedsem.infgres.repository.impl.*;
+import com.github.sinedsem.infgres.repository.impl.AbstractRepositoryImpl;
+import com.github.sinedsem.infgres.repository.impl.PostgresContinuousRepositoryImpl;
+import com.github.sinedsem.infgres.repository.impl.PostgresEventRepositoryImpl;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +51,11 @@ public class Repositories {
         return new PostgresEventRepositoryImpl<>(clazz, entityManager);
     }
 
+    public boolean isInflux() {
+        return influx;
+    }
 
+    public void setInflux(boolean influx) {
+        this.influx = influx;
+    }
 }

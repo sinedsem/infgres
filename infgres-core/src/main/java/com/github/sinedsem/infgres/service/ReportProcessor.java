@@ -1,9 +1,10 @@
 package com.github.sinedsem.infgres.service;
 
+import com.github.sinedsem.infgres.config.Repositories;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -11,16 +12,16 @@ import java.util.UUID;
 @Service
 public class ReportProcessor {
 
-    @Value("${influx}")
-    private boolean influx;
-
     private final PostgresPersister postgresPersister;
     private final InfluxPersister influxPersister;
+    private final Repositories repositories;
+
 
     @Autowired
-    public ReportProcessor(PostgresPersister postgresPersister, InfluxPersister influxPersister) {
+    public ReportProcessor(PostgresPersister postgresPersister, InfluxPersister influxPersister, @Qualifier("repositories") Repositories repositories) {
         this.postgresPersister = postgresPersister;
         this.influxPersister = influxPersister;
+        this.repositories = repositories;
     }
 
     public void processReport(AgentReport agentReport) {
@@ -28,7 +29,7 @@ public class ReportProcessor {
             agentReport.setId(UUID.randomUUID());
         }
 
-        if (influx) {
+        if (repositories.isInflux()) {
             persistInflux(agentReport);
         } else {
             persistPostgres(agentReport);
