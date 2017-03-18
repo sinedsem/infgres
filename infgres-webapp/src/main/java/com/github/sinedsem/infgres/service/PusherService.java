@@ -29,6 +29,8 @@ public class PusherService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private String host = "192.168.1.250";
+
     @Autowired
     public PusherService(CloseableHttpClient httpClient, JdbcTemplate jdbcTemplate) {
         this.httpClient = httpClient;
@@ -70,7 +72,7 @@ public class PusherService {
 
         System.out.println("pushing " + result.size());
 
-        int batchSize = 10;
+        int batchSize = 100;
 
         for (int i = 0; i < result.size(); i += batchSize) {
             List<DatamineEntity> batch = new ArrayList<>(batchSize);
@@ -97,7 +99,7 @@ public class PusherService {
 //        agentReport.setStartTime(entity.getStartTime());
 //        agentReport.setEndTime(entity.getEndTime());
 
-        HttpPost request = new HttpPost("http://localhost:9010/listener/report");
+        HttpPost request = new HttpPost("http://" + host + ":9010/listener/report");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(objectToJson(agentReport), "utf-8"));
 
@@ -120,7 +122,7 @@ public class PusherService {
 
         agentReport.getEntities().addAll(entities);
 
-        HttpPost request = new HttpPost("http://localhost:9010/listener/report");
+        HttpPost request = new HttpPost("http://" + host + ":9010/listener/report");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(objectToJson(agentReport), "utf-8"));
 
