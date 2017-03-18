@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.UUID;
 
 @Service
 public class PostgresPersister {
@@ -35,7 +36,7 @@ public class PostgresPersister {
 
     @Transactional
     boolean persist(ContinuousDatamineEntity entity) {
-        createNodeIfNotExists(entity);
+        createNodeIfNotExists(entity.getNodeId());
 
         @SuppressWarnings("unchecked")
         ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
@@ -83,7 +84,7 @@ public class PostgresPersister {
     }
 
     boolean persist(EventDatamineEntity entity) {
-        createNodeIfNotExists(entity);
+        createNodeIfNotExists(entity.getNodeId());
 
         EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
 
@@ -91,11 +92,11 @@ public class PostgresPersister {
         return true;
     }
 
-    void createNodeIfNotExists(DatamineEntity entity) {
-        Node node = nodeRepository.findOne(entity.getNodeId());
+    void createNodeIfNotExists(UUID nodeId) {
+        Node node = nodeRepository.findOne(nodeId);
         if (node == null) {
             node = new Node();
-            node.setId(entity.getNodeId());
+            node.setId(nodeId);
             nodeRepository.save(node);
         }
     }

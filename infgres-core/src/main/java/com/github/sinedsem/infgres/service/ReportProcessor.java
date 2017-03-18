@@ -23,7 +23,7 @@ public class ReportProcessor {
         this.influxPersister = influxPersister;
     }
 
-    public void logRequestHistory(AgentReport agentReport) {
+    public void processReport(AgentReport agentReport) {
         if (agentReport.getId() == null) {
             agentReport.setId(UUID.randomUUID());
         }
