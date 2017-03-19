@@ -155,6 +155,18 @@ public class PusherService {
         }
     }
 
+    public void setDb(boolean influx) {
+        System.out.println("set db influx " + influx);
+
+        HttpGet request = new HttpGet("http://" + host + ":9010/listener/setDb?influx=" + influx);
+        try {
+            CloseableHttpResponse response = httpClient.execute(request);
+            response.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public long getDuration() {
         HttpGet request = new HttpGet("http://" + host + ":9010/listener/time");
         try {

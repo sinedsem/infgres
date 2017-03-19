@@ -46,6 +46,7 @@ public class ListenerController {
     @ResponseBody
     boolean resetTime() {
         startTime.set(-1);
+        endTime.set(-1);
         return true;
     }
 

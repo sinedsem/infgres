@@ -12,9 +12,15 @@
 </head>
 <body>
 
-<input type="button" onclick="test()">
+<input type="radio" name="dbInflux" value="true" checked="checked">Influx</input>
+<input type="radio" name="dbInflux" value="false">Postgres</input>
+<input type="button" value="Change DB" onclick="setDb()">
 
-<div id="chartContainer" style="height: 300px; width: 100%;">
+<br>
+<input type="button" value="Generate Data" onclick="generate()">
+<input type="button" value="Push" onclick="push()">
+
+<div id="chartContainer" style="height: 300px; width: 100%; margin-top: 100px;">
 </div>
 
 </body>

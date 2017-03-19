@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -21,13 +22,15 @@ public class PostgresPersister {
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
     private final AtomicLong endTime;
+    private final ExecutorService nodesExecutor;
 
 
     @Autowired
-    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime) {
+    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime, ExecutorService nodesExecutor) {
         this.repositoriesService = repositoriesService;
         this.nodeRepository = nodeRepository;
         this.endTime = endTime;
+        this.nodesExecutor = nodesExecutor;
     }
 
     boolean persist(DatamineEntity entity) {
@@ -41,7 +44,9 @@ public class PostgresPersister {
 
     @Transactional
     boolean persist(ContinuousDatamineEntity entity) {
-        createNodeIfNotExists(entity.getNodeId());
+        UUID nodeId = entity.getNodeId();
+
+        nodesExecutor.submit(() -> createNodeIfNotExists(nodeId));
 
         @SuppressWarnings("unchecked")
         ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
@@ -91,7 +96,8 @@ public class PostgresPersister {
     }
 
     boolean persist(EventDatamineEntity entity) {
-        createNodeIfNotExists(entity.getNodeId());
+        UUID nodeId = entity.getNodeId();
+        nodesExecutor.submit(() -> createNodeIfNotExists(nodeId));
 
         EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
 

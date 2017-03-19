@@ -3,10 +3,7 @@ package com.github.sinedsem.infgres.resource;
 import com.github.sinedsem.infgres.service.PusherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/pusher")
@@ -29,7 +26,7 @@ public class PusherController {
         while (duration == -1) {
             duration = pusherService.getDuration();
         }
-        return duration;
+        return duration / 1_000_000; // return in milliseconds
     }
 
     @RequestMapping(value = "/generate", method = RequestMethod.GET)
@@ -38,5 +35,13 @@ public class PusherController {
         pusherService.generate();
         return true;
     }
+
+    @RequestMapping(value = "/setDb", method = RequestMethod.GET)
+    @ResponseBody
+    boolean setDb(@RequestParam(defaultValue = "true") Boolean influx) {
+        pusherService.setDb(influx);
+        return influx;
+    }
+
 
 }
