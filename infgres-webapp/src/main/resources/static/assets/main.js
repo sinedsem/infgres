@@ -41,7 +41,7 @@ window.onload = function () {
 }
 
 function generate() {
-    $.get("http://localhost:9011/pusher/generate", function (e) {
+    $.get("http://localhost:9011/api/generate", function (e) {
 
     });
 }
@@ -52,7 +52,7 @@ function push() {
 
     var index = influx == 'true' ? 0 : 1;
 
-    $.get("http://localhost:9011/pusher/push", function (time) {
+    $.get("http://localhost:9011/api/push", function (time) {
         console.log(time);
         chart.options.data[index].dataPoints.push({label: 'Push', y: time});
         chart.render();
@@ -62,7 +62,31 @@ function push() {
 
 function setDb() {
     var influx = $('input[name="dbInflux"]:checked').val();
-    $.get("http://localhost:9011/pusher/setDb?influx=" + influx, function (e) {
+    $.get("http://localhost:9011/api/setDb?influx=" + influx, function (e) {
         console.log(e);
     });
+}
+
+
+function report() {
+
+    var influx = $('input[name="dbInflux"]:checked').val();
+
+    $.get("http://localhost:9011/api/report", function (rr) {
+        console.log(rr);
+        reportDuration(influx);
+    });
+
+}
+
+function reportDuration(influx) {
+
+    var index = influx == 'true' ? 0 : 1;
+
+    $.get("http://localhost:9011/api/reportDuration", function (time) {
+        console.log(time);
+        chart.options.data[index].dataPoints.push({label: 'Report', y: time});
+        chart.render();
+    });
+
 }

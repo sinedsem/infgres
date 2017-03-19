@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -21,11 +22,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
-public class PusherService {
+public class WebService {
 
     private static final int DAY_IN_SECONDS = 86_400;
 
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    private volatile long reportRequestStartTime = 0;
+    private volatile long reportRequestEndTime = 0;
 
     private String host = "192.168.1.250";
     private List<DatamineEntity> generatedData;
@@ -35,7 +39,7 @@ public class PusherService {
 
 
     @Autowired
-    public PusherService(CloseableHttpClient httpClient) {
+    public WebService(CloseableHttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -180,6 +184,38 @@ public class PusherService {
         return -1;
     }
 
+    public synchronized byte[] getReport() {
+
+        String url = "http://" + host + ":9010/reporter/report";
+
+        CloseableHttpResponse response = null;
+        reportRequestStartTime = System.nanoTime();
+        reportRequestEndTime = -1;
+        try {
+            response = httpClient.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response != null && response.getStatusLine().getStatusCode() == 200) {
+            try {
+                byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
+                reportRequestEndTime = System.nanoTime();
+                response.close();
+                return result;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new byte[0];
+    }
+
+    public synchronized long getReportDuration() {
+        if (reportRequestEndTime == -1) {
+            return -1;
+        }
+        return reportRequestEndTime - reportRequestStartTime;
+    }
+
     private static String objectToJson(Object object) {
         try {
             return mapper.writeValueAsString(object);
@@ -187,4 +223,5 @@ public class PusherService {
             throw new IllegalArgumentException("Wrong object passed to ObjectMapper - can not convert to JSON", e);
         }
     }
+
 }

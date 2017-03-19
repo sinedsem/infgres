@@ -40,13 +40,16 @@ public class InfluxReporter {
         int usedSpaceIndex = series.getColumns().indexOf("usedSpace");
         int numberIndex = series.getColumns().indexOf("number");
         int startTimeIndex = series.getColumns().indexOf("time");
+        int endTimeIndex = series.getColumns().indexOf("endTime");
         int nodeIdIndex = series.getColumns().indexOf("nodeId");
 
         NodeEntities nodeEntities = new NodeEntities();
 
         for (List<Object> list : series.getValues()) {
             DiskStatus diskStatus = new DiskStatus();
+            diskStatus.setNodeId(UUID.fromString((String) list.get(nodeIdIndex)));
             diskStatus.setStartTime((long) ((Double) list.get(startTimeIndex)).doubleValue());
+            diskStatus.setEndTime((long) ((Double) list.get(endTimeIndex)).doubleValue());
             nodeEntities.getEntities().add(diskStatus);
         }
 

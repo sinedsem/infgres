@@ -1,30 +1,30 @@
 package com.github.sinedsem.infgres.resource;
 
-import com.github.sinedsem.infgres.service.PusherService;
+import com.github.sinedsem.infgres.service.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/pusher")
+@RequestMapping("/api")
 @CrossOrigin
-public class PusherController {
+public class WebController {
 
 
-    private final PusherService pusherService;
+    private final WebService webService;
 
     @Autowired
-    public PusherController(PusherService pusherService) {
-        this.pusherService = pusherService;
+    public WebController(WebService webService) {
+        this.webService = webService;
     }
 
     @RequestMapping(value = "/push", method = RequestMethod.GET)
     @ResponseBody
     long push() {
-        pusherService.pushGeneratedData(100);
+        webService.pushGeneratedData(100);
         long duration = -1;
         while (duration == -1) {
-            duration = pusherService.getDuration();
+            duration = webService.getDuration();
         }
         return duration / 1_000_000; // return in milliseconds
     }
@@ -32,16 +32,27 @@ public class PusherController {
     @RequestMapping(value = "/generate", method = RequestMethod.GET)
     @ResponseBody
     boolean generate() {
-        pusherService.generate();
+        webService.generate();
         return true;
     }
 
     @RequestMapping(value = "/setDb", method = RequestMethod.GET)
     @ResponseBody
     boolean setDb(@RequestParam(defaultValue = "true") Boolean influx) {
-        pusherService.setDb(influx);
+        webService.setDb(influx);
         return influx;
     }
 
+    @RequestMapping(value = "/report", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public byte[] getReport() {
+        return webService.getReport();
+    }
+
+    @RequestMapping(value = "/reportDuration", method = RequestMethod.GET)
+    @ResponseBody
+    public long getReportDuration() {
+        return webService.getReportDuration() / 1_000_000; // return in milliseconds
+    }
 
 }

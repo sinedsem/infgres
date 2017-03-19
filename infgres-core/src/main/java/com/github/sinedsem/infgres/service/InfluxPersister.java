@@ -54,7 +54,8 @@ public class InfluxPersister {
             Point.Builder builder = Point.measurement(entity.getInfluxMeasurement())
                     .time(entity.getStartTime(), TimeUnit.SECONDS)
                     .tag("nodeId", entity.getNodeId().toString())
-                    .addField("requestId", agentReport.getId().toString());
+                    .addField("requestId", agentReport.getId().toString())
+                    .addField("endTime", entity.getEndTime());
             entity.setInfluxTagsAndFields(builder);
 
             entitiesToPersist.add(builder.build());

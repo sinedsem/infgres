@@ -1,5 +1,6 @@
 package com.github.sinedsem.infgres.datamodel.datamine;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.influxdb.dto.Point;
@@ -86,6 +87,7 @@ public abstract class DatamineEntity {
         this.endTime = endTime;
     }
 
+    @JsonIgnore
     public String getCriteria() {
         return "";
     }
@@ -96,5 +98,6 @@ public abstract class DatamineEntity {
     public void setInfluxTagsAndFields(Point.Builder builder) {
     }
 
+    @JsonIgnore
     public abstract String getInfluxMeasurement();
 }
