@@ -21,16 +21,21 @@ public class PusherController {
         this.pusherService = pusherService;
     }
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @RequestMapping(value = "/push", method = RequestMethod.GET)
     @ResponseBody
-    boolean report() {
-        pusherService.push();
-        return true;
+    long push() {
+        pusherService.pushGeneratedData(100);
+        long duration = -1;
+        while (duration == -1) {
+            duration = pusherService.getDuration();
+        }
+        return duration;
     }
 
     @RequestMapping(value = "/generate", method = RequestMethod.GET)
     @ResponseBody
     boolean generate() {
+        pusherService.generate();
         return true;
     }
 

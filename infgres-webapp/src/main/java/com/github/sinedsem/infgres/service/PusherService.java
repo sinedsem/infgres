@@ -6,55 +6,79 @@ import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class PusherService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private static final int DAY_IN_SECONDS = 86_400;
 
-    private final CloseableHttpClient httpClient;
-
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private String host = "192.168.1.250";
+    private List<DatamineEntity> generatedData;
+
+    private final CloseableHttpClient httpClient;
+    private ExecutorService requestExecutor = Executors.newFixedThreadPool(10);
+
 
     @Autowired
-    public PusherService(CloseableHttpClient httpClient, JdbcTemplate jdbcTemplate) {
+    public PusherService(CloseableHttpClient httpClient) {
         this.httpClient = httpClient;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void push() {
 
-        final long interval = jdbcTemplate.queryForObject("SELECT t as c FROM (SELECT (f_endtime - f_starttime) / 100 as t FROM dpa.view_group_config) times GROUP BY t HAVING COUNT(t) > 4 ORDER BY t, c LIMIT 1", Long.class) * 100;
+    public void generate() {
 
-        List<DatamineEntity> list = new ArrayList<>(10000);
+        generatedData = new ArrayList<>();
 
-        jdbcTemplate.query("SELECT f_inactivity, f_starttime, f_endtime, f_agent_id FROM dpa.view_group_config ORDER BY f_starttime", resultSet -> {
-            DiskStatus diskStatus = new DiskStatus();
-            diskStatus.setStartTime(resultSet.getLong("f_starttime"));
-            diskStatus.setEndTime(resultSet.getLong("f_endtime"));
-            diskStatus.setTotalSpace(resultSet.getLong("f_inactivity"));
-            diskStatus.setNodeId(resultSet.getObject("f_agent_id", UUID.class));
-            list.add(diskStatus);
+        List<UUID> nodes = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            nodes.add(UUID.randomUUID());
+        }
 
-        });
+        for (UUID nodeId : nodes) {
+
+            Random random = new Random();
+
+            List<DatamineEntity> list = new ArrayList<>(10000);
+
+            int interval = 43_200;
+            int days = 200;
+
+            long endTime = System.currentTimeMillis() / 1000;
+            long startTime = endTime - days * DAY_IN_SECONDS;
+            while (startTime < endTime) {
+                long nextEndTime = startTime + interval * (random.nextInt(90) + 1);
+                DiskStatus diskStatus = new DiskStatus();
+                diskStatus.setStartTime(startTime);
+                diskStatus.setEndTime(nextEndTime);
+                diskStatus.setTotalSpace(50_000_000);
+                diskStatus.setUsedSpace(random.nextInt(50_000_000));
+                diskStatus.setNodeId(nodeId);
+                list.add(diskStatus);
+                startTime = nextEndTime;
+            }
+
+            generatedData.addAll(expandCompressedEntities(interval, list));
+        }
+    }
 
 
-        List<DatamineEntity> result = new ArrayList<>(10000);
+    private List<DatamineEntity> expandCompressedEntities(long interval, List<DatamineEntity> list) {
+        List<DatamineEntity> result = new ArrayList<>(list.size() * 100);
 
         for (DatamineEntity entity : list) {
             long realEndTime = entity.getEndTime();
@@ -69,56 +93,41 @@ public class PusherService {
                 startTime = startTime + interval;
             }
         }
-
-        System.out.println("pushing " + result.size());
-
-        int batchSize = 100;
-
-        for (int i = 0; i < result.size(); i += batchSize) {
-            List<DatamineEntity> batch = new ArrayList<>(batchSize);
-            for (int j = 0; j < batchSize && i + j < result.size(); j++) {
-                batch.add(result.get(i + j));
-            }
-            new Thread(() -> pushAll(batch)).start();
-        }
-
-//        for (DatamineEntity entity : result) {
-//            new Thread(() -> pushOne(entity)).start();
-//        }
-
-//        pushAll(result);
-
+        return result;
     }
 
-    private void pushOne(DatamineEntity entity) {
+    public void pushGeneratedData(int batchSize) {
+        resetStopwatch();
 
-        AgentReport agentReport = new AgentReport();
-        agentReport.setId(null);
+        System.out.println("pushing " + generatedData.size());
 
-        agentReport.getEntities().add(entity);
-//        agentReport.setStartTime(entity.getStartTime());
-//        agentReport.setEndTime(entity.getEndTime());
+        List<Callable<Void>> tasks = new ArrayList<>(generatedData.size() / batchSize);
 
-        HttpPost request = new HttpPost("http://" + host + ":9010/listener/report");
-        request.setHeader("Content-Type", "application/json");
-        request.setEntity(new StringEntity(objectToJson(agentReport), "utf-8"));
+        for (int i = 0; i < generatedData.size(); i += batchSize) {
+            List<DatamineEntity> batch = new ArrayList<>(batchSize);
+            for (int j = 0; j < batchSize && i + j < generatedData.size(); j++) {
+                batch.add(generatedData.get(i + j));
+            }
 
-//        System.out.println("sending report " + entity.getStartTime() + "-"+  entity.getEndTime());
+            tasks.add(() -> {
+                pushAll(batch);
+                return null;
+            });
+
+        }
 
         try {
-            CloseableHttpResponse response = httpClient.execute(request);
-            response.close();
-//            System.out.println(response.getStatusLine());
-        } catch (IOException e) {
+            requestExecutor.invokeAll(tasks);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
 
+    }
 
     private void pushAll(Collection<? extends DatamineEntity> entities) {
 
         AgentReport agentReport = new AgentReport();
-        agentReport.setId(null);
+//        agentReport.setId(null);
 
         agentReport.getEntities().addAll(entities);
 
@@ -126,18 +135,40 @@ public class PusherService {
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(objectToJson(agentReport), "utf-8"));
 
-//        System.out.println("sending report " + entity.getStartTime() + "-"+  entity.getEndTime());
-
         try {
             CloseableHttpResponse response = httpClient.execute(request);
             response.close();
-//            System.out.println(response.getStatusLine());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String objectToJson(Object object) {
+    private void resetStopwatch() {
+        System.out.println("resetting stopwatch");
+
+        HttpGet request = new HttpGet("http://" + host + ":9010/listener/resetStopwatch");
+        try {
+            CloseableHttpResponse response = httpClient.execute(request);
+            response.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public long getDuration() {
+        HttpGet request = new HttpGet("http://" + host + ":9010/listener/time");
+        try {
+            CloseableHttpResponse response = httpClient.execute(request);
+            String s = new BasicResponseHandler().handleResponse(response);
+            response.close();
+            return Long.parseLong(s);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private static String objectToJson(Object object) {
         try {
             return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {

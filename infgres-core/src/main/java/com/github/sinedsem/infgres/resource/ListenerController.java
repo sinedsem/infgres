@@ -42,7 +42,7 @@ public class ListenerController {
         return true;
     }
 
-    @RequestMapping(value = "/resetTime", method = RequestMethod.GET)
+    @RequestMapping(value = "/resetStopwatch", method = RequestMethod.GET)
     @ResponseBody
     boolean resetTime() {
         startTime.set(-1);

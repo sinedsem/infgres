@@ -8,21 +8,26 @@ import com.github.sinedsem.infgres.repository.NodeRepository;
 import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
 import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class PostgresPersister {
 
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
+    private final AtomicLong endTime;
+
 
     @Autowired
-    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository) {
+    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime) {
         this.repositoriesService = repositoriesService;
         this.nodeRepository = nodeRepository;
+        this.endTime = endTime;
     }
 
     boolean persist(DatamineEntity entity) {
@@ -80,6 +85,8 @@ public class PostgresPersister {
             }
         }
 
+        endTime.set(System.nanoTime());
+
         return true;
     }
 
@@ -89,6 +96,8 @@ public class PostgresPersister {
         EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
 
         repository.save(entity);
+
+        endTime.set(System.nanoTime());
         return true;
     }
 

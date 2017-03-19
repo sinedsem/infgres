@@ -11,11 +11,17 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.security.GeneralSecurityException;
 
 @Configuration
 public class Config {
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return null;
+    }
 
     @Bean
     public CloseableHttpClient httpClient() {
