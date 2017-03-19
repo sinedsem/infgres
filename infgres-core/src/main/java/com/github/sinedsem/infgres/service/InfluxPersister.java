@@ -60,6 +60,8 @@ public class InfluxPersister {
             entitiesToPersist.add(builder.build());
         }
 
+        endTime.set(-1);
+
         // executing in another thread to release http request
         persisterExecutor.submit(() -> {
             if (lock.tryLock()) {
@@ -76,6 +78,7 @@ public class InfluxPersister {
 
     private void doPersist() {
         while (!entitiesToPersist.isEmpty()) {
+            endTime.set(-1);
 
             BatchPoints batchPoints = BatchPoints
                     .database(dbName)
