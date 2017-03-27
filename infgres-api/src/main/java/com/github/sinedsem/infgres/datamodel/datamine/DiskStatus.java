@@ -92,7 +92,12 @@ public class DiskStatus extends ContinuousDatamineEntity {
     }
 
     @Override
-    public String getInfluxMeasurement() {
+    public String getTableName() {
         return "disk_status";
+    }
+
+    @Override
+    public String getKey() {
+        return super.getKey() + "|" + number;
     }
 }

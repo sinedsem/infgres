@@ -51,7 +51,7 @@ public class InfluxPersister {
         for (DatamineEntity entity : agentReport.getEntities()) {
             nodesExecutor.submit(() -> postgresPersister.createNodeIfNotExists(entity.getNodeId()), null);
 
-            Point.Builder builder = Point.measurement(entity.getInfluxMeasurement())
+            Point.Builder builder = Point.measurement(entity.getTableName())
                     .time(entity.getStartTime(), TimeUnit.SECONDS)
                     .tag("nodeId", entity.getNodeId().toString())
                     .addField("requestId", agentReport.getId().toString())

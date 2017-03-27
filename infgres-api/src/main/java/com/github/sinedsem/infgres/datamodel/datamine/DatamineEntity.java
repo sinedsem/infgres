@@ -99,5 +99,13 @@ public abstract class DatamineEntity {
     }
 
     @JsonIgnore
-    public abstract String getInfluxMeasurement();
+    public abstract String getTableName();
+
+    public String getKey() {
+        return getTableName() + "|" + nodeId.toString();
+    }
+ /*
+    public boolean keysEqual(DatamineEntity entity){
+        return nodeId.equals(entity.getNodeId());
+    }*/
 }

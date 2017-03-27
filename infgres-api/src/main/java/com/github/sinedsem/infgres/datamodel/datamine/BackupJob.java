@@ -65,7 +65,7 @@ public class BackupJob extends EventDatamineEntity {
     }
 
     @Override
-    public String getInfluxMeasurement() {
+    public String getTableName() {
         return "backup_job";
     }
 }
