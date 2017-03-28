@@ -3,6 +3,7 @@ package com.github.sinedsem.infgres.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
+import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import org.apache.commons.io.IOUtils;
@@ -13,6 +14,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.init.ResourceReader;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,7 +33,8 @@ public class WebService {
     private volatile long reportRequestStartTime = 0;
     private volatile long reportRequestEndTime = 0;
 
-    private String host = "192.168.1.250";
+    //    private String host = "192.168.1.250";
+    private String host = "localhost";
     private List<DatamineEntity> generatedData;
 
     private final CloseableHttpClient httpClient;
@@ -184,7 +187,7 @@ public class WebService {
         return -1;
     }
 
-    public synchronized byte[] getReport() {
+    public synchronized byte[] getReport(ServerReportRequest reportRequest) {
 
         String url = "http://" + host + ":9010/reporter/report";
 
@@ -192,18 +195,29 @@ public class WebService {
         reportRequestStartTime = System.nanoTime();
         reportRequestEndTime = -1;
         try {
-            response = httpClient.execute(new HttpGet(url));
+            HttpPost request = new HttpPost(url);
+            request.setEntity(new StringEntity(objectToJson(reportRequest), "utf-8"));
+            request.setHeader("Content-Type", "application/json");
+            response = httpClient.execute(request);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (response != null && response.getStatusLine().getStatusCode() == 200) {
+        if (response != null) {
             try {
-                byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
-                reportRequestEndTime = System.nanoTime();
-                response.close();
-                return result;
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
+                    reportRequestEndTime = System.nanoTime();
+                    response.close();
+                    return result;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return new byte[0];
@@ -224,4 +238,24 @@ public class WebService {
         }
     }
 
+    public byte[] loadNodes() {
+        String url = "http://" + host + ":9010/reporter/nodes";
+
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response != null && response.getStatusLine().getStatusCode() == 200) {
+            try {
+                byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
+                response.close();
+                return result;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new byte[0];
+    }
 }

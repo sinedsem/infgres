@@ -67,15 +67,53 @@ function setDb() {
     });
 }
 
+function loadNodes() {
+    $.get("http://localhost:9011/api/nodes", function (nodes) {
+        var select = document.getElementById("nodes_select");
+        select.innerHTML = "";
+
+        var options = "";
+        for (var i = 0; i < nodes.length; i++) {
+            options += "<option value='" + nodes[i].id + "' title='" + nodes[i].id + "'>" + nodes[i].name + "</option>";
+        }
+        select.innerHTML = options;
+    });
+}
+
 
 function report() {
+    var options = document.getElementById("nodes_select").options;
+    var reportRequest = {};
+    reportRequest.startTime = 1490000001;
+    reportRequest.endTime = 1589998801;
+    reportRequest.nodeIds = [];
+
+    for (var i = 0, iLen = options.length; i < iLen; i++) {
+        var opt = options[i];
+
+        if (opt.selected) {
+            reportRequest.nodeIds.push(opt.value || opt.text);
+        }
+    }
 
     var influx = $('input[name="dbInflux"]:checked').val();
 
-    $.get("http://localhost:9011/api/report", function (rr) {
+    $.ajax({
+        type: 'POST',
+        url: 'http://localhost:9011/api/report',
+        data: JSON.stringify(reportRequest), // or JSON.stringify ({name: 'jonas'}),
+        success: function (rr) {
+            console.log(rr);
+            reportDuration(influx);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+
+    /*$.post("http://localhost:9011/api/report", JSON.stringify(reportRequest), function (rr) {
         console.log(rr);
         reportDuration(influx);
-    });
+    }, "json");*/
 
 }
 

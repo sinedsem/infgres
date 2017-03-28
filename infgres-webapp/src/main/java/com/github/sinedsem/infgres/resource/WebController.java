@@ -1,5 +1,8 @@
 package com.github.sinedsem.infgres.resource;
 
+import com.github.sinedsem.infgres.datamodel.ServerReport;
+import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
+import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import com.github.sinedsem.infgres.service.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,10 +46,17 @@ public class WebController {
         return influx;
     }
 
-    @RequestMapping(value = "/report", method = RequestMethod.GET, produces = "application/json")
+
+    @RequestMapping(value = "/report", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    public byte[] getReport() {
-        return webService.getReport();
+    public byte[] report(@RequestBody ServerReportRequest request) {
+        return webService.getReport(request);
+    }
+
+    @RequestMapping(value = "/nodes", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public byte[] loadNodes() {
+        return webService.loadNodes();
     }
 
     @RequestMapping(value = "/reportDuration", method = RequestMethod.GET)

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="width: 95%; height: 95%">
 <head>
     <meta charset="UTF-8">
     <title>Infgres!!!</title>
@@ -10,20 +10,39 @@
     <script type="text/javascript" src="assets/main.js"></script>
 
 </head>
-<body>
+<body style="width: 95%; height: 95%">
 
-<input type="radio" name="dbInflux" value="true" checked="checked">Influx</input>
-<input type="radio" name="dbInflux" value="false">Postgres</input>
-<input type="button" value="Change DB" onclick="setDb()">
+<table style="width: 100%; height: 100%">
+    <tr>
+        <td style="width: 50%">
+            <input type="radio" name="dbInflux" value="true" checked="checked">Influx</input>
+            <input type="radio" name="dbInflux" value="false">Postgres</input>
+            <input type="button" value="Change DB" onclick="setDb()">
 
-<br>
-<input type="button" value="Generate Data" onclick="generate()">
-<input type="button" value="Push" onclick="push()">
-<br>
-<input type="button" value="Report" onclick="report()">
+            <br>
+            <input type="button" value="Generate Data" onclick="generate()">
+            <input type="button" value="Push" onclick="push()">
+            <br>
+            <input type="button" value="Report" onclick="report()">
+        </td>
+        <td>
 
-<div id="chartContainer" style="height: 300px; width: 100%; margin-top: 100px;">
-</div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="button" value="Load Nodes" onclick="loadNodes()">
+            <input type="button" value="Get Report" onclick="report()">
+            <select id="nodes_select" name="nodeId[]" multiple style="width: 100%; min-height: 400px;">
+
+            </select>
+        </td>
+        <td>
+            <div id="chartContainer" style="height: 300px; width: 100%; margin-top: 100px;"></div>
+        </td>
+    </tr>
+</table>
+
 
 </body>
 </html>
