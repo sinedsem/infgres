@@ -66,5 +66,12 @@ public class ListenerController {
         return influx;
     }
 
+    @RequestMapping(value = "/clearDbs", method = RequestMethod.GET)
+    @ResponseBody
+    boolean clearDbs(@RequestParam(defaultValue = "false") Boolean full) {
+        reportProcessor.clearDbs(full);
+        return true;
+    }
+
 
 }

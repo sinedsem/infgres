@@ -5,6 +5,7 @@ import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,4 +105,7 @@ public class InfluxPersister {
 
     }
 
+    public void clearDb() {
+        influxDB.query(new Query("DROP measurement disk_status", dbName));
+    }
 }

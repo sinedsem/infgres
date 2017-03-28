@@ -24,8 +24,18 @@ public class RepositoriesService {
         return (ContinuousRepository) repositories.getRepositoryFor(entity.getClass());
     }
 
-    <T extends EventDatamineEntity> EventRepository<T> getRepository(T entity) {
+    ContinuousRepository getContinuousRepositoryByClass(Class<? extends ContinuousDatamineEntity> clazz) {
         //noinspection unchecked
-        return (EventRepository<T>) repositories.getRepositoryFor(entity.getClass());
+        return (ContinuousRepository) repositories.getRepositoryFor(clazz);
+    }
+
+    EventRepository getRepository(EventDatamineEntity entity) {
+        //noinspection unchecked
+        return (EventRepository) repositories.getRepositoryFor(entity.getClass());
+    }
+
+    EventRepository getEventRepositoryByClass(Class<? extends EventDatamineEntity> clazz) {
+        //noinspection unchecked
+        return (EventRepository) repositories.getRepositoryFor(clazz);
     }
 }

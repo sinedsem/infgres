@@ -7,7 +7,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.util.UUID;
 
 @NoRepositoryBean
-public interface EventRepository<T extends EventDatamineEntity> extends CrudRepository<T, UUID> {
+public interface EventRepository<T extends EventDatamineEntity> extends CrudRepository<T, UUID>, DatamineRepository<T> {
 
 
 }

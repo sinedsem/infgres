@@ -67,6 +67,12 @@ function setDb() {
     });
 }
 
+function clearDbs(full) {
+    $.get("http://localhost:9011/api/clearDbs?full=" + full, function (e) {
+        console.log(e);
+    });
+}
+
 function loadNodes() {
     $.get("http://localhost:9011/api/nodes", function (nodes) {
         var select = document.getElementById("nodes_select");
@@ -84,8 +90,8 @@ function loadNodes() {
 function report() {
     var options = document.getElementById("nodes_select").options;
     var reportRequest = {};
-    reportRequest.startTime = 1490000001;
-    reportRequest.endTime = 1589998801;
+    reportRequest.startTime = document.getElementById("startTime").value;
+    reportRequest.endTime = document.getElementById("endTime").value;
     reportRequest.nodeIds = [];
 
     for (var i = 0, iLen = options.length; i < iLen; i++) {

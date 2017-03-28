@@ -15,6 +15,9 @@
 <table style="width: 100%; height: 100%">
     <tr>
         <td style="width: 50%">
+            <input type="button" value="Clear nodes table" onclick="clearDbs(false)">
+            <input type="button" value="Clear all data" onclick="clearDbs(true)">
+            <br>
             <input type="radio" name="dbInflux" value="true" checked="checked">Influx</input>
             <input type="radio" name="dbInflux" value="false">Postgres</input>
             <input type="button" value="Change DB" onclick="setDb()">
@@ -22,8 +25,6 @@
             <br>
             <input type="button" value="Generate Data" onclick="generate()">
             <input type="button" value="Push" onclick="push()">
-            <br>
-            <input type="button" value="Report" onclick="report()">
         </td>
         <td>
 
@@ -33,6 +34,8 @@
         <td>
             <input type="button" value="Load Nodes" onclick="loadNodes()">
             <input type="button" value="Get Report" onclick="report()">
+            <input type="text" placeholder="startTime" id="startTime" value="1480000001">
+            <input type="text" placeholder="endTime" id="endTime" value="1589998801">
             <select id="nodes_select" name="nodeId[]" multiple style="width: 100%; min-height: 400px;">
 
             </select>

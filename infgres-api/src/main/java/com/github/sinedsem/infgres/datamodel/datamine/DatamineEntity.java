@@ -101,6 +101,7 @@ public abstract class DatamineEntity {
     @JsonIgnore
     public abstract String getTableName();
 
+    @JsonIgnore
     public String getKey() {
         return getTableName() + "|" + nodeId.toString();
     }

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,8 +41,7 @@ public class PostgresPersister {
         return false;
     }
 
-    @Transactional
-    boolean persist(ContinuousDatamineEntity entity) {
+    synchronized boolean persist(ContinuousDatamineEntity entity) {
         UUID nodeId = entity.getNodeId();
 
         nodesExecutor.submit(() -> createNodeIfNotExists(nodeId));

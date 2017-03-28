@@ -2,9 +2,9 @@ package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.NodeEntities;
 import com.github.sinedsem.infgres.datamodel.ServerReport;
-import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import com.github.sinedsem.infgres.utils.Utils;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -50,7 +50,7 @@ public class InfluxReporter {
         }
 
         Query query = new Query("SELECT * FROM disk_status " + where.toString(), dbName);
-        QueryResult result = influxDB.query(query, TimeUnit.MILLISECONDS);
+        QueryResult result = influxDB.query(query, TimeUnit.SECONDS);
 
         ServerReport serverReport = new ServerReport();
 
@@ -67,9 +67,10 @@ public class InfluxReporter {
         int endTimeIndex = series.getColumns().indexOf("endTime");
         int nodeIdIndex = series.getColumns().indexOf("nodeId");
 
-        NodeEntities nodeEntities = new NodeEntities();
+        Map<UUID, NodeEntities> nodeEntitiesMap = new HashMap<>();
 
         for (List<Object> list : series.getValues()) {
+
             DiskStatus diskStatus = new DiskStatus();
             diskStatus.setNodeId(UUID.fromString((String) list.get(nodeIdIndex)));
             diskStatus.setStartTime((long) ((Double) list.get(startTimeIndex)).doubleValue());
@@ -77,35 +78,24 @@ public class InfluxReporter {
             diskStatus.setTotalSpace((long) ((Double) list.get(totalSpaceIndex)).doubleValue());
             diskStatus.setUsedSpace((long) ((Double) list.get(usedSpaceIndex)).doubleValue());
             diskStatus.setNumber(Integer.parseInt((String) list.get(numberIndex)));
+
+            NodeEntities nodeEntities;
+            if (nodeEntitiesMap.containsKey(diskStatus.getNodeId())) {
+                nodeEntities = nodeEntitiesMap.get(diskStatus.getNodeId());
+            } else {
+                nodeEntities = new NodeEntities();
+                nodeEntities.setNodeId(diskStatus.getNodeId());
+                nodeEntitiesMap.put(diskStatus.getNodeId(), nodeEntities);
+            }
             nodeEntities.getEntities().add(diskStatus);
         }
 
-        seizeEntities(nodeEntities.getEntities());
-
-        serverReport.getNodeEntities().add(nodeEntities);
+        for (NodeEntities nodeEntities : nodeEntitiesMap.values()) {
+            Utils.seizeEntities(nodeEntities.getEntities());
+            serverReport.getNodeEntities().add(nodeEntities);
+        }
 
         return serverReport;
     }
 
-    private void seizeEntities(Collection<DatamineEntity> entities) {
-
-        Map<String, DatamineEntity> previous = new HashMap<>();
-
-        for (Iterator<DatamineEntity> it = entities.iterator(); it.hasNext(); ) {
-            DatamineEntity entity = it.next();
-            if (entity instanceof ContinuousDatamineEntity) {
-                String key = entity.getKey();
-                DatamineEntity prev = previous.get(key);
-
-                if (prev != null && prev.equals(entity)) {
-                    prev.setEndTime(entity.getEndTime());
-                    prev.setRequestId(entity.getRequestId());
-                    it.remove();
-                } else {
-                    previous.put(key, entity);
-                }
-            }
-
-        }
-    }
 }

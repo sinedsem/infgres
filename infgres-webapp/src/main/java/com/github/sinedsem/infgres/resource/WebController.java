@@ -1,8 +1,6 @@
 package com.github.sinedsem.infgres.resource;
 
-import com.github.sinedsem.infgres.datamodel.ServerReport;
 import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
-import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import com.github.sinedsem.infgres.service.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -46,6 +44,11 @@ public class WebController {
         return influx;
     }
 
+    @RequestMapping(value = "/clearDbs", method = RequestMethod.GET)
+    @ResponseBody
+    boolean clearDbs(@RequestParam(defaultValue = "false") Boolean full) {
+        return webService.clearDbs(full);
+    }
 
     @RequestMapping(value = "/report", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody

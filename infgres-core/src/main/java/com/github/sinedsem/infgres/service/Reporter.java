@@ -18,15 +18,17 @@ import java.util.UUID;
 public class Reporter {
 
     private final Repositories repositories;
-    private final InfluxReporter influxReporter;
     private final NodeRepository nodeRepository;
+    private final InfluxReporter influxReporter;
+    private final PostgresReporter postgresReporter;
 
 
     @Autowired
-    public Reporter(@Qualifier("repositories") Repositories repositories, InfluxReporter influxReporter, NodeRepository nodeRepository) {
+    public Reporter(@Qualifier("repositories") Repositories repositories, InfluxReporter influxReporter, NodeRepository nodeRepository, PostgresReporter postgresReporter) {
         this.repositories = repositories;
         this.influxReporter = influxReporter;
         this.nodeRepository = nodeRepository;
+        this.postgresReporter = postgresReporter;
     }
 
     public ServerReport makeReport(Collection<UUID> nodeIds, Class<? extends DatamineEntity> clazz, long startTime, long endTime) {
@@ -34,7 +36,7 @@ public class Reporter {
         if (repositories.isInflux()) {
             return influxReporter.makeReport(nodeIds, clazz, startTime, endTime);
         } else {
-            throw new UnsupportedOperationException();
+            return postgresReporter.makeReport(nodeIds, clazz, startTime, endTime);
         }
     }
 

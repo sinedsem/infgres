@@ -14,7 +14,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.init.ResourceReader;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class WebService {
         generatedData = new ArrayList<>();
 
         List<UUID> nodes = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             nodes.add(UUID.randomUUID());
         }
 
@@ -63,7 +62,7 @@ public class WebService {
             List<DatamineEntity> list = new ArrayList<>(10000);
 
             int interval = 43_200;
-            int days = 200;
+            int days = 400;
 
             long endTime = System.currentTimeMillis() / 1000;
             long startTime = endTime - days * DAY_IN_SECONDS;
@@ -257,5 +256,19 @@ public class WebService {
             }
         }
         return new byte[0];
+    }
+
+    public boolean clearDbs(boolean full) {
+        System.out.println("clearing dbs, full=" + full);
+
+        HttpGet request = new HttpGet("http://" + host + ":9010/listener/clearDbs?full=" + full);
+        try {
+            CloseableHttpResponse response = httpClient.execute(request);
+            response.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
