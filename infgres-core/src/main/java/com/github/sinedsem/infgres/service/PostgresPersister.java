@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,15 +22,13 @@ public class PostgresPersister {
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
     private final AtomicLong endTime;
-    private final ExecutorService nodesExecutor;
 
 
     @Autowired
-    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime, ExecutorService nodesExecutor) {
+    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime) {
         this.repositoriesService = repositoriesService;
         this.nodeRepository = nodeRepository;
         this.endTime = endTime;
-        this.nodesExecutor = nodesExecutor;
     }
 
     boolean persist(DatamineEntity entity) {
@@ -42,9 +41,6 @@ public class PostgresPersister {
     }
 
     synchronized boolean persist(ContinuousDatamineEntity entity) {
-        UUID nodeId = entity.getNodeId();
-
-        nodesExecutor.submit(() -> createNodeIfNotExists(nodeId));
 
         @SuppressWarnings("unchecked")
         ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
@@ -95,7 +91,6 @@ public class PostgresPersister {
 
     boolean persist(EventDatamineEntity entity) {
         UUID nodeId = entity.getNodeId();
-        nodesExecutor.submit(() -> createNodeIfNotExists(nodeId));
 
         EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
 
@@ -114,4 +109,12 @@ public class PostgresPersister {
         }
     }
 
+    public void persistEventEntities(List<EventDatamineEntity> entities) {
+
+        EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entities.get(0));
+
+        repository.save(entities);
+
+        endTime.set(System.nanoTime());
+    }
 }

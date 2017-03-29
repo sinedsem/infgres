@@ -33,7 +33,8 @@ public class WebController {
     @RequestMapping(value = "/generate", method = RequestMethod.GET)
     @ResponseBody
     boolean generate() {
-        webService.generate();
+//        webService.generate();
+        webService.generateEvent();
         return true;
     }
 

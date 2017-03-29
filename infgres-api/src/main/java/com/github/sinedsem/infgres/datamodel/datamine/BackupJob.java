@@ -1,6 +1,8 @@
 package com.github.sinedsem.infgres.datamodel.datamine;
 
 
+import org.influxdb.dto.Point;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -67,5 +69,14 @@ public class BackupJob extends EventDatamineEntity {
     @Override
     public String getTableName() {
         return "backup_job";
+    }
+
+    @Override
+    public void setInfluxTagsAndFields(Point.Builder builder) {
+        builder.addField("level", level);
+        builder.addField("status", status);
+        builder.addField("errorCode", errorCode);
+        builder.addField("jobSize", jobSize);
+        builder.addField("path", path);
     }
 }
