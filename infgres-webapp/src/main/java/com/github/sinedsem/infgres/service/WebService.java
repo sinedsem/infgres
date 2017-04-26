@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import org.apache.commons.io.IOUtils;
@@ -79,6 +80,47 @@ public class WebService {
             }
 
             generatedData.addAll(expandCompressedEntities(interval, list));
+        }
+    }
+
+
+    public void generateEvent() {
+
+        generatedData = new ArrayList<>();
+
+        List<UUID> nodes = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            nodes.add(UUID.randomUUID());
+        }
+
+        for (UUID nodeId : nodes) {
+
+            Random random = new Random();
+
+            List<DatamineEntity> list = new ArrayList<>(10000);
+
+            int days = 50;
+
+            long endTime = System.currentTimeMillis() / 1000;
+            long startTime = endTime - days * DAY_IN_SECONDS;
+            while (startTime < endTime) {
+
+                BackupJob backupJob = new BackupJob();
+                backupJob.setStartTime(startTime);
+                backupJob.setEndTime(startTime + random.nextInt(1000));
+                backupJob.setNodeId(nodeId);
+                backupJob.setLevel(random.nextBoolean() ? "full" : "incremental");
+                backupJob.setErrorCode(random.nextInt(8));
+                backupJob.setJobSize(random.nextInt(50_000_000));
+                backupJob.setStatus("unknown");
+                backupJob.setPath("C:\\Users\\semend\\Documents\\Pictures");
+
+                startTime += random.nextInt(DAY_IN_SECONDS);
+
+                list.add(backupJob);
+            }
+
+            generatedData.addAll(list);
         }
     }
 
