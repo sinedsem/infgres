@@ -62,6 +62,12 @@ public class WebController {
         return webService.loadNodes();
     }
 
+    @RequestMapping(value = "/groups", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public byte[] loadGroups() {
+        return webService.loadGroups();
+    }
+
     @RequestMapping(value = "/reportDuration", method = RequestMethod.GET)
     @ResponseBody
     public long getReportDuration() {

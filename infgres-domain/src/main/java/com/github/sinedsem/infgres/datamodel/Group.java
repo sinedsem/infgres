@@ -3,10 +3,12 @@ package com.github.sinedsem.infgres.datamodel;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
-public class Node {
+@Table(name = "grp")
+public class Group {
 
     @Id
     @Column(name = "f_id")
@@ -15,10 +17,10 @@ public class Node {
     @Column(name = "f_name")
     private String name;
 
-    public Node() {
+    public Group() {
     }
 
-    public Node(UUID id) {
+    public Group(UUID id) {
         this.id = id;
     }
 

@@ -10,9 +10,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>infgres-domain</module>
         <module>infgres-core</module>
         <module>infgres-webapp</module>
-        <module>infgres-api</module>
     </modules>
 
     <dependencies>

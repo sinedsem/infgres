@@ -258,6 +258,27 @@ public class WebService {
         return new byte[0];
     }
 
+    public byte[] loadGroups() {
+        String url = "http://" + host + ":9010/reporter/groups";
+
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response != null && response.getStatusLine().getStatusCode() == 200) {
+            try {
+                byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
+                response.close();
+                return result;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return new byte[0];
+    }
+
     public boolean clearDbs(boolean full) {
         System.out.println("clearing dbs, full=" + full);
 

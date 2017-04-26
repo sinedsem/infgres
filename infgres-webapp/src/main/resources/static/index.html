@@ -1,51 +1,83 @@
 <!DOCTYPE html>
-<html lang="en" style="width: 95%; height: 95%">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Infgres!!!</title>
 
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="assets/materialize.min.css">
+
     <script type="text/javascript" src="assets/jquery-3.2.0.min.js"></script>
+
     <script type="text/javascript" src="assets/jquery.canvasjs.min.js"></script>
+    <script type="text/javascript" src="assets/materialize.min.js"></script>
 
     <script type="text/javascript" src="assets/main.js"></script>
 
+    <style>
+        .min250 {
+            min-width: 250px;
+        }
+    </style>
+
 </head>
-<body style="width: 95%; height: 95%">
+<body>
+<div class="row">
+    <div class="col s6">
+        <div class="row">
+            <h2 class="header">Actions</h2>
+        </div>
+        <div class="row">
+            <a class="waves-effect waves-light btn min250" onclick="clearDbs(false)">Clear nodes table</a>
+            <a class="waves-effect waves-light btn min250" onclick="clearDbs(true)">Clear all data</a>
+        </div>
+        <div class="row">
+            <span class="min250" style="display: inline-block; text-align: center">
+                <input name="dbInflux" type="radio" id="influx_radio" class="with-gap" value="true" checked/>
+                <label for="influx_radio">Influx</label>
+                <input name="dbInflux" type="radio" id="postgres_radio" class="with-gap" value="false"/>
+                <label for="postgres_radio">Postgres</label>
+            </span>
+            <a class="waves-effect waves-light btn min250" onclick="setDb()">Change DBMS</a>
+        </div>
+        <div class="row">
+            <a class="waves-effect waves-light btn min250" onclick="generate()">Prepare Data</a>
+            <a class="waves-effect waves-light btn min250" onclick="push()">Push</a>
+        </div>
+        <div class="row">
+            <a class="waves-effect waves-light btn min250" onclick="loadNodes()">Load Nodes</a>
+        </div>
+        <div class="row">
+            <div class="input-field col s6">
+                <label>Groups</label>
+                <select id="groups_select" name="groupId[]" multiple> </select>
+            </div>
+            <div class="input-field col s6">
+                <label>Nodes</label>
+                <select id="nodes_select" name="nodeId[]" multiple> </select>
+            </div>
+        </div>
 
-<table style="width: 100%; height: 100%">
-    <tr>
-        <td style="width: 50%">
-            <input type="button" value="Clear nodes table" onclick="clearDbs(false)">
-            <input type="button" value="Clear all data" onclick="clearDbs(true)">
-            <br>
-            <input type="radio" name="dbInflux" value="true" checked="checked">Influx</input>
-            <input type="radio" name="dbInflux" value="false">Postgres</input>
-            <input type="button" value="Change DB" onclick="setDb()">
-
-            <br>
-            <input type="button" value="Generate Data" onclick="generate()">
-            <input type="button" value="Push" onclick="push()">
-        </td>
-        <td>
-
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="button" value="Load Nodes" onclick="loadNodes()">
-            <input type="button" value="Get Report" onclick="report()">
-            <input type="text" placeholder="startTime" id="startTime" value="1480000001">
-            <input type="text" placeholder="endTime" id="endTime" value="1589998801">
-            <select id="nodes_select" name="nodeId[]" multiple style="width: 100%; min-height: 400px;">
-
-            </select>
-        </td>
-        <td>
+        <div class="row">
+            <div class="input-field col s6">
+                <input type="text" id="startTime" value="1480000001">
+                <label for="startTime">Start Time</label>
+            </div>
+            <div class="input-field col s6">
+                <input type="text" id="endTime" value="1589998801">
+                <label for="endTime">End Time</label>
+            </div>
+        </div>
+        <div class="row">
+            <a class="waves-effect waves-light btn min250" onclick="report()">Get Report</a>
+        </div>
+    </div>
+    <div class="col s6">
+        <div class="row">
             <div id="chartContainer" style="height: 300px; width: 100%; margin-top: 100px;"></div>
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
 
-
+</div>
 </body>
 </html>

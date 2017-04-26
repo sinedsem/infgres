@@ -1,5 +1,6 @@
 package com.github.sinedsem.infgres.resource;
 
+import com.github.sinedsem.infgres.datamodel.Group;
 import com.github.sinedsem.infgres.datamodel.Node;
 import com.github.sinedsem.infgres.datamodel.ServerReport;
 import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
@@ -37,6 +38,12 @@ public class ReportController {
     @ResponseBody
     List<Node> nodes() {
         return reporter.getNodesList();
+    }
+
+    @RequestMapping(value = "/groups", method = RequestMethod.GET)
+    @ResponseBody
+    List<Group> groups() {
+        return reporter.getGroupsList();
     }
 
 

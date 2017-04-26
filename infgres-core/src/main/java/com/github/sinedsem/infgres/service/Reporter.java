@@ -1,9 +1,11 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.config.Repositories;
+import com.github.sinedsem.infgres.datamodel.Group;
 import com.github.sinedsem.infgres.datamodel.Node;
 import com.github.sinedsem.infgres.datamodel.ServerReport;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
+import com.github.sinedsem.infgres.repository.GroupRepository;
 import com.github.sinedsem.infgres.repository.NodeRepository;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,16 @@ public class Reporter {
     private final NodeRepository nodeRepository;
     private final InfluxReporter influxReporter;
     private final PostgresReporter postgresReporter;
+    private final GroupRepository groupRepository;
 
 
     @Autowired
-    public Reporter(@Qualifier("repositories") Repositories repositories, InfluxReporter influxReporter, NodeRepository nodeRepository, PostgresReporter postgresReporter) {
+    public Reporter(@Qualifier("repositories") Repositories repositories, InfluxReporter influxReporter, NodeRepository nodeRepository, PostgresReporter postgresReporter, GroupRepository groupRepository) {
         this.repositories = repositories;
         this.influxReporter = influxReporter;
         this.nodeRepository = nodeRepository;
         this.postgresReporter = postgresReporter;
+        this.groupRepository = groupRepository;
     }
 
     public ServerReport makeReport(Collection<UUID> nodeIds, Class<? extends DatamineEntity> clazz, long startTime, long endTime) {
@@ -43,5 +47,9 @@ public class Reporter {
 
     public List<Node> getNodesList() {
         return Lists.newArrayList(nodeRepository.findAll());
+    }
+
+    public List<Group> getGroupsList() {
+        return Lists.newArrayList(groupRepository.findAll());
     }
 }
