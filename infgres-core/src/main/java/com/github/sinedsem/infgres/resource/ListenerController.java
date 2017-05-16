@@ -35,10 +35,13 @@ public class ListenerController {
     @RequestMapping(value = "/report", method = RequestMethod.POST)
     @ResponseBody
     boolean report(@RequestBody AgentReport agentReport) {
-        startTime.compareAndSet(-1, System.nanoTime());
-        requestCounter.incrementAndGet();
-        reportProcessor.processReport(agentReport);
-        requestCounter.decrementAndGet();
+        try {
+            startTime.compareAndSet(-1, System.nanoTime());
+            requestCounter.incrementAndGet();
+            reportProcessor.processReport(agentReport);
+        } finally {
+            requestCounter.decrementAndGet();
+        }
         return true;
     }
 

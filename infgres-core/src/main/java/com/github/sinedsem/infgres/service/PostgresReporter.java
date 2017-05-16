@@ -1,7 +1,6 @@
 package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.NodeEntities;
-import com.github.sinedsem.infgres.datamodel.ServerReport;
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
@@ -14,19 +13,14 @@ import java.util.*;
 @Service
 public class PostgresReporter {
 
-
     private final RepositoriesService repositoriesService;
-
 
     @Autowired
     public PostgresReporter(RepositoriesService repositoriesService) {
         this.repositoriesService = repositoriesService;
     }
 
-    public ServerReport makeReport(Collection<UUID> nodeIds, Class<? extends DatamineEntity> clazz, long startTime, long endTime) {
-
-        ServerReport serverReport = new ServerReport();
-
+    public Map<UUID, NodeEntities> makeReport(Collection<UUID> nodeIds, Class<? extends DatamineEntity> clazz, long startTime, long endTime) {
         DatamineRepository<DatamineEntity> repository;
         if (ContinuousDatamineEntity.class.isAssignableFrom(clazz)) {
             //noinspection unchecked
@@ -35,7 +29,7 @@ public class PostgresReporter {
             //noinspection unchecked
             repository = repositoriesService.getEventRepositoryByClass((Class<? extends EventDatamineEntity>) clazz);
         } else {
-            return serverReport;
+            return Collections.emptyMap();
         }
 
         List<DatamineEntity> entities = repository.makeReport(nodeIds, startTime, endTime);
@@ -54,11 +48,8 @@ public class PostgresReporter {
             nodeEntities.getEntities().add(entity);
         }
 
-        for (NodeEntities nodeEntities : nodeEntitiesMap.values()) {
-            serverReport.getNodeEntities().add(nodeEntities);
-        }
+        return nodeEntitiesMap;
 
-        return serverReport;
     }
 
 }

@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     $('select').material_select();
 });
 
@@ -42,7 +42,7 @@ window.onload = function () {
 
 
     chart.render();
-}
+};
 
 function generate() {
     $.get("http://localhost:9011/api/generate", function (e) {
@@ -77,32 +77,57 @@ function clearDbs(full) {
     });
 }
 
-function loadNodes() {
+function loadNodesAndGroups() {
     $.get("http://localhost:9011/api/nodes", function (nodes) {
         var select = document.getElementById("nodes_select");
         select.innerHTML = "";
 
-        var options = "";
+        var options = "<option disabled>Select Node(s)</option>";
         for (var i = 0; i < nodes.length; i++) {
             options += "<option value='" + nodes[i].id + "' title='" + nodes[i].id + "'>" + nodes[i].name + "</option>";
         }
         select.innerHTML = options;
+        $(select).material_select();
+    });
+
+    $.get("http://localhost:9011/api/groups", function (groups) {
+        var select = document.getElementById("groups_select");
+        select.innerHTML = "";
+
+        var options = "<option disabled>Select Group(s)</option>";
+        for (var i = 0; i < groups.length; i++) {
+            options += "<option value='" + groups[i].id + "' title='" + groups[i].id + "'>" + groups[i].name + "</option>";
+        }
+        select.innerHTML = options;
+        $(select).material_select();
     });
 }
 
 
 function report() {
-    var options = document.getElementById("nodes_select").options;
+    var options;
+    options = document.getElementById("nodes_select").options;
     var reportRequest = {};
     reportRequest.startTime = document.getElementById("startTime").value;
     reportRequest.endTime = document.getElementById("endTime").value;
     reportRequest.nodeIds = [];
+    reportRequest.groupIds = [];
 
     for (var i = 0, iLen = options.length; i < iLen; i++) {
         var opt = options[i];
 
         if (opt.selected) {
             reportRequest.nodeIds.push(opt.value || opt.text);
+        }
+    }
+
+    options = document.getElementById("groups_select").options;
+
+    for (var i = 0, iLen = options.length; i < iLen; i++) {
+        var opt = options[i];
+
+        if (opt.selected) {
+            reportRequest.groupIds.push(opt.value || opt.text);
         }
     }
 
@@ -114,6 +139,7 @@ function report() {
         data: JSON.stringify(reportRequest), // or JSON.stringify ({name: 'jonas'}),
         success: function (rr) {
             console.log(rr);
+            $('#json-renderer').jsonViewer(rr, {collapsed: true});
             reportDuration(influx);
         },
         contentType: "application/json",
@@ -121,9 +147,9 @@ function report() {
     });
 
     /*$.post("http://localhost:9011/api/report", JSON.stringify(reportRequest), function (rr) {
-        console.log(rr);
-        reportDuration(influx);
-    }, "json");*/
+     console.log(rr);
+     reportDuration(influx);
+     }, "json");*/
 
 }
 

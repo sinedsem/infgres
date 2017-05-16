@@ -1,7 +1,7 @@
 package com.github.sinedsem.infgres.repository;
 
 import com.github.sinedsem.infgres.datamodel.Node;
-import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 
 public interface DatamineDAO {
 
@@ -9,5 +9,5 @@ public interface DatamineDAO {
 
     boolean isNodeExists(Node node);
 
-    void insertData(DiskStatus diskStatus);
+    void insertData(BackupConfiguration backupConfiguration);
 }

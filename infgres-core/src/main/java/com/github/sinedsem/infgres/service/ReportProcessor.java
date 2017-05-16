@@ -2,21 +2,16 @@ package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.config.Repositories;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
-import com.github.sinedsem.infgres.datamodel.Node;
 import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 @Service
@@ -87,7 +82,7 @@ public class ReportProcessor {
     public void clearDbs(Boolean full) {
         if (full) {
             repositoriesService.getEventRepositoryByClass(BackupJob.class).deleteAll();
-            repositoriesService.getContinuousRepositoryByClass(DiskStatus.class).deleteAll();
+            repositoriesService.getContinuousRepositoryByClass(BackupConfiguration.class).deleteAll();
             influxPersister.clearDb();
         }
         nodeRepository.deleteAll();

@@ -2,11 +2,11 @@ package com.github.sinedsem.infgres.config;
 
 import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.impl.AbstractRepositoryImpl;
-import com.github.sinedsem.infgres.repository.impl.PostgresContinuousRepositoryImpl;
-import com.github.sinedsem.infgres.repository.impl.PostgresEventRepositoryImpl;
+import com.github.sinedsem.infgres.repository.impl.ContinuousRepositoryImpl;
+import com.github.sinedsem.infgres.repository.impl.EventRepositoryImpl;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +33,8 @@ public class Repositories {
 
     @Bean
     @Autowired
-    public AbstractRepositoryImpl<DiskStatus> diskStatusRepositoryImpl(EntityManager entityManager) {
-        return getContinuousImplementation(entityManager, DiskStatus.class);
+    public AbstractRepositoryImpl<BackupConfiguration> backupConfigurationRepositoryImpl(EntityManager entityManager) {
+        return getContinuousImplementation(entityManager, BackupConfiguration.class);
     }
 
     @Bean
@@ -44,11 +44,11 @@ public class Repositories {
     }
 
     private <T extends ContinuousDatamineEntity> AbstractRepositoryImpl<T> getContinuousImplementation(EntityManager entityManager, Class<T> clazz) {
-        return new PostgresContinuousRepositoryImpl<>(clazz, entityManager);
+        return new ContinuousRepositoryImpl<>(clazz, entityManager);
     }
 
     private <T extends EventDatamineEntity> AbstractRepositoryImpl<T> getEventImplementation(EntityManager entityManager, Class<T> clazz) {
-        return new PostgresEventRepositoryImpl<>(clazz, entityManager);
+        return new EventRepositoryImpl<>(clazz, entityManager);
     }
 
     public boolean isInflux() {

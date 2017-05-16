@@ -16,7 +16,7 @@ public class Node {
 
     @ManyToOne
     @JoinColumn(name = "f_grp_id")
-    private Group group;
+    private Grp grp;
 
     public Node() {
     }
@@ -41,11 +41,11 @@ public class Node {
         this.name = name;
     }
 
-    public Group getGroup() {
-        return group;
+    public Grp getGrp() {
+        return grp;
     }
 
-    public void setGroup(Group group) {
-        this.group = group;
+    public void setGrp(Grp grp) {
+        this.grp = grp;
     }
 }

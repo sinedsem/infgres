@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "grp")
-public class Group {
+public class Grp {
 
     @Id
     @Column(name = "f_id")
@@ -17,10 +17,10 @@ public class Group {
     @Column(name = "f_name")
     private String name;
 
-    public Group() {
+    public Grp() {
     }
 
-    public Group(UUID id) {
+    public Grp(UUID id) {
         this.id = id;
     }
 

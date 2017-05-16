@@ -5,9 +5,9 @@ import com.github.sinedsem.infgres.repository.datamine.EventRepository;
 
 import javax.persistence.EntityManager;
 
-public class PostgresEventRepositoryImpl<T extends EventDatamineEntity> extends AbstractRepositoryImpl<T> implements EventRepository<T> {
+public class EventRepositoryImpl<T extends EventDatamineEntity> extends AbstractRepositoryImpl<T> implements EventRepository<T> {
 
-    public PostgresEventRepositoryImpl(Class<T> domainClass, EntityManager entityManager) {
+    public EventRepositoryImpl(Class<T> domainClass, EntityManager entityManager) {
         super(domainClass, entityManager);
     }
 

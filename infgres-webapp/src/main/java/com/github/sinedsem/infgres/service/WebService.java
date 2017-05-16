@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.ServerReportRequest;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.DiskStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,7 +17,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -35,7 +35,7 @@ public class WebService {
 
     //    private String host = "192.168.1.250";
     private String host = "localhost";
-    private List<DatamineEntity> generatedData;
+    private List<DatamineEntity> generatedData = new ArrayList<>();
 
     private final CloseableHttpClient httpClient;
     private ExecutorService requestExecutor = Executors.newFixedThreadPool(10);
@@ -46,15 +46,18 @@ public class WebService {
         this.httpClient = httpClient;
     }
 
-
-    public void generate() {
-
-        generatedData = new ArrayList<>();
-
+    public void generateBoth(){
         List<UUID> nodes = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             nodes.add(UUID.randomUUID());
         }
+        generateContinuous(nodes);
+        generateEvent(nodes);
+    }
+
+    public void generateContinuous(Iterable<? extends UUID> nodes) {
+
+        List<DatamineEntity> entities = new ArrayList<>();
 
         for (UUID nodeId : nodes) {
 
@@ -63,35 +66,32 @@ public class WebService {
             List<DatamineEntity> list = new ArrayList<>(10000);
 
             int interval = 43_200;
-            int days = 400;
+            int days = 50;
 
             long endTime = System.currentTimeMillis() / 1000;
             long startTime = endTime - days * DAY_IN_SECONDS;
             while (startTime < endTime) {
                 long nextEndTime = startTime + interval * (random.nextInt(90) + 1);
-                DiskStatus diskStatus = new DiskStatus();
-                diskStatus.setStartTime(startTime);
-                diskStatus.setEndTime(nextEndTime);
-                diskStatus.setTotalSpace(50_000_000);
-                diskStatus.setUsedSpace(random.nextInt(50_000_000));
-                diskStatus.setNodeId(nodeId);
-                list.add(diskStatus);
+                BackupConfiguration backupConfiguration = new BackupConfiguration();
+                backupConfiguration.setStartTime(startTime);
+                backupConfiguration.setEndTime(nextEndTime);
+                backupConfiguration.setSchedule("0 0 12 1/1 * ? *");
+                backupConfiguration.setPath("C:/");
+                backupConfiguration.setLevel("Full");
+                backupConfiguration.setNodeId(nodeId);
+                list.add(backupConfiguration);
                 startTime = nextEndTime;
             }
 
-            generatedData.addAll(expandCompressedEntities(interval, list));
+            entities.addAll(expandCompressedEntities(interval, list));
         }
+
+        saveEntitiesToFile(entities, "backup_configuration.txt");
     }
 
+    public void generateEvent(List<UUID> nodes) {
 
-    public void generateEvent() {
-
-        generatedData = new ArrayList<>();
-
-        List<UUID> nodes = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            nodes.add(UUID.randomUUID());
-        }
+        List<DatamineEntity> entities = new ArrayList<>();
 
         for (UUID nodeId : nodes) {
 
@@ -113,17 +113,19 @@ public class WebService {
                 backupJob.setErrorCode(random.nextInt(8));
                 backupJob.setJobSize(random.nextInt(50_000_000));
                 backupJob.setStatus("unknown");
-                backupJob.setPath("C:\\Users\\semend\\Documents\\Pictures");
+                backupJob.setPath("C:\\Users\\Administrator\\Documents\\Pictures");
 
                 startTime += random.nextInt(DAY_IN_SECONDS);
 
                 list.add(backupJob);
             }
 
-            generatedData.addAll(list);
+            entities.addAll(list);
         }
-    }
 
+        saveEntitiesToFile(entities, "backup_job.txt");
+
+    }
 
     private List<DatamineEntity> expandCompressedEntities(long interval, List<DatamineEntity> list) {
         List<DatamineEntity> result = new ArrayList<>(list.size() * 100);
@@ -133,7 +135,7 @@ public class WebService {
             long startTime = entity.getStartTime();
 
             while (startTime + interval <= realEndTime) {
-                DatamineEntity diskStatus = new DiskStatus((DiskStatus) entity);
+                DatamineEntity diskStatus = new BackupConfiguration((BackupConfiguration) entity);
                 diskStatus.setEndTime(startTime + interval * 2);
                 diskStatus.setStartTime(startTime);
 
@@ -142,6 +144,39 @@ public class WebService {
             }
         }
         return result;
+    }
+
+    private void saveEntitiesToFile(List<DatamineEntity> entities, String file) {
+        try {
+            PrintWriter printWriter = new PrintWriter(file);
+
+            for (DatamineEntity entity : entities) {
+                printWriter.println(objectToJson(entity));
+            }
+
+            printWriter.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadEntitiesFromFile() {
+        generatedData = new ArrayList<>();
+        loadEntitiesFromFile("backup_job.txt", BackupJob.class);
+        loadEntitiesFromFile("backup_configuration.txt", BackupConfiguration.class);
+    }
+
+    public void loadEntitiesFromFile(String file, Class<? extends DatamineEntity> clazz) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+            String line;
+            while ((line = reader.readLine()) != null) {
+                DatamineEntity entity = mapper.readValue(line, clazz);
+                generatedData.add(entity);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void pushGeneratedData(int batchSize) {

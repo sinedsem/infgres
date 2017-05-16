@@ -106,7 +106,7 @@ public class InfluxPersister {
     }
 
     public void clearDb() {
-        influxDB.query(new Query("DROP measurement disk_status", dbName));
+        influxDB.query(new Query("DROP measurement backup_configuration", dbName));
         influxDB.query(new Query("DROP measurement backup_job", dbName));
     }
 }

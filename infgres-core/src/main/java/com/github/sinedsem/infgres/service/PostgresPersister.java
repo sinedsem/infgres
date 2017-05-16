@@ -1,5 +1,6 @@
 package com.github.sinedsem.infgres.service;
 
+import com.github.sinedsem.infgres.datamodel.Grp;
 import com.github.sinedsem.infgres.datamodel.Node;
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -105,11 +105,16 @@ public class PostgresPersister {
         if (node == null) {
             node = new Node();
             node.setId(nodeId);
+            node.setName(nodeId.toString());
+            node.setGrp(new Grp(UUID.fromString("7502dad7-ea0d-4019-8ac6-71dbdac7d624")));
             nodeRepository.save(node);
         }
     }
 
     public void persistEventEntities(List<EventDatamineEntity> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
 
         EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entities.get(0));
 

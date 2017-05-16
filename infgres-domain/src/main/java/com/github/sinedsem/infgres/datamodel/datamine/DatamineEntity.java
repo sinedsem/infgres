@@ -15,7 +15,7 @@ import java.util.UUID;
         include = JsonTypeInfo.As.PROPERTY,
         property = "datamineType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DiskStatus.class),
+        @JsonSubTypes.Type(value = BackupConfiguration.class),
         @JsonSubTypes.Type(value = BackupJob.class)
 })
 @MappedSuperclass

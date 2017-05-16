@@ -6,11 +6,13 @@
 
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="assets/materialize.min.css">
+    <link rel="stylesheet" href="assets/jquery.json-viewer.css">
 
     <script type="text/javascript" src="assets/jquery-3.2.0.min.js"></script>
 
     <script type="text/javascript" src="assets/jquery.canvasjs.min.js"></script>
     <script type="text/javascript" src="assets/materialize.min.js"></script>
+    <script type="text/javascript" src="assets/jquery.json-viewer.js"></script>
 
     <script type="text/javascript" src="assets/main.js"></script>
 
@@ -25,7 +27,7 @@
 <div class="row">
     <div class="col s6">
         <div class="row">
-            <h2 class="header">Actions</h2>
+            <h4 class="header">Actions</h4>
         </div>
         <div class="row">
             <a class="waves-effect waves-light btn min250" onclick="clearDbs(false)">Clear nodes table</a>
@@ -45,19 +47,25 @@
             <a class="waves-effect waves-light btn min250" onclick="push()">Push</a>
         </div>
         <div class="row">
-            <a class="waves-effect waves-light btn min250" onclick="loadNodes()">Load Nodes</a>
+            <a class="waves-effect waves-light btn min250" onclick="loadNodesAndGroups()">Load Nodes and Groups</a>
         </div>
         <div class="row">
-            <div class="input-field col s6">
-                <label>Groups</label>
-                <select id="groups_select" name="groupId[]" multiple> </select>
-            </div>
-            <div class="input-field col s6">
+            <div class="input-field nodes">
+                <select id="nodes_select" name="nodeId[]" multiple>
+                    <option disabled>Click Load</option>
+                </select>
                 <label>Nodes</label>
-                <select id="nodes_select" name="nodeId[]" multiple> </select>
             </div>
+            <div class="input-field groups">
+                <select id="groups_select" name="groupId[]" multiple>
+                    <option disabled>Click Load</option>
+                </select>
+                <label>Groups</label>
+            </div>
+            <!--<a class="waves-effect waves-light btn min250" onclick="">Add Selected Nodes To Selected Group</a>-->
         </div>
 
+        <h4>Report request</h4>
         <div class="row">
             <div class="input-field col s6">
                 <input type="text" id="startTime" value="1480000001">
@@ -67,15 +75,25 @@
                 <input type="text" id="endTime" value="1589998801">
                 <label for="endTime">End Time</label>
             </div>
-        </div>
-        <div class="row">
             <a class="waves-effect waves-light btn min250" onclick="report()">Get Report</a>
         </div>
     </div>
     <div class="col s6">
         <div class="row">
-            <div id="chartContainer" style="height: 300px; width: 100%; margin-top: 100px;"></div>
+            <h4 class="header">Measurements</h4>
         </div>
+        <div class="row">
+            <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+        </div>
+        <div class="row">
+            <h4 class="header">Report</h4>
+        </div>
+        <div class="row">
+            <!--<a class="waves-effect waves-light btn min250" onclick="switchEntity()">BackupConfiguration</a>-->
+            <!--<a class="waves-effect waves-light btn min250" onclick="switchEntity()">BackupJob</a>-->
+            <pre id="json-renderer"></pre>
+        </div>
+
     </div>
 
 </div>
