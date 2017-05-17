@@ -46,7 +46,7 @@ public class WebService {
         this.httpClient = httpClient;
     }
 
-    public void generateBoth(){
+    public void generateBoth() {
         List<UUID> nodes = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             nodes.add(UUID.randomUUID());
@@ -168,7 +168,7 @@ public class WebService {
     }
 
     public void loadEntitiesFromFile(String file, Class<? extends DatamineEntity> clazz) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 DatamineEntity entity = mapper.readValue(line, clazz);
@@ -179,7 +179,7 @@ public class WebService {
         }
     }
 
-    public void pushGeneratedData(int batchSize) {
+    public boolean pushGeneratedData(int batchSize) {
         resetStopwatch();
 
         System.out.println("pushing " + generatedData.size());
@@ -199,15 +199,21 @@ public class WebService {
 
         }
 
-        try {
-            requestExecutor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (!tasks.isEmpty()) {
+            try {
+                requestExecutor.invokeAll(tasks);
+                return true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
+        return false;
     }
 
     private void pushAll(Collection<? extends DatamineEntity> entities) {
+
+        System.out.println("Pushing agent report, entities count: " + entities.size());
 
         AgentReport agentReport = new AgentReport();
 //        agentReport.setId(null);

@@ -164,3 +164,33 @@ function reportDuration(influx) {
     });
 
 }
+
+function saveToFile(event) {
+    var data = "Hello!";
+
+    var results = [];
+
+    var i = 0;
+    while (chart.options.data[0].dataPoints[i] || chart.options.data[1].dataPoints[i]) {
+        if (chart.options.data[0].dataPoints[i]) {
+            var influx = {};
+            influx.index = chart.options.data[0].dataPoints[i].x;
+            influx.dbms = chart.options.data[0].name;
+            influx.action = chart.options.data[0].dataPoints[i].label;
+            influx.time = chart.options.data[0].dataPoints[i].y;
+            results.push(influx);
+        }
+        if (chart.options.data[1].dataPoints[i]) {
+            var postgres = {};
+            postgres.index = chart.options.data[1].dataPoints[i].x;
+            postgres.dbms = chart.options.data[1].name;
+            postgres.action = chart.options.data[1].dataPoints[i].label;
+            postgres.time = chart.options.data[1].dataPoints[i].y;
+            results.push(postgres);
+        }
+        i++;
+    }
+
+
+    event.target.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(results));
+}

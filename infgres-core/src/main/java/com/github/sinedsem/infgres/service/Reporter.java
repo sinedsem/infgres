@@ -39,10 +39,16 @@ public class Reporter {
     }
 
     public ServerReport makeReport(Collection<UUID> nodeIds, List<UUID> groupIds, long startTime, long endTime) {
-        List<Node> byGroup = nodeRepository.findByGroup(groupIds);
-        nodeIds.addAll(byGroup.stream().map(Node::getId).collect(Collectors.toSet()));
+        if (groupIds != null && !groupIds.isEmpty()) {
+            List<Node> byGroup = nodeRepository.findByGroup(groupIds);
+            nodeIds.addAll(byGroup.stream().map(Node::getId).collect(Collectors.toSet()));
+        }
 
         ServerReport serverReport = new ServerReport();
+
+        if (nodeIds.isEmpty()) {
+            return serverReport;
+        }
 
         Map<UUID, NodeEntities> map1;
         Map<UUID, NodeEntities> map2;

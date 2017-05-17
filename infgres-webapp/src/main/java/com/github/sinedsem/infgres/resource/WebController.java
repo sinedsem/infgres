@@ -22,7 +22,10 @@ public class WebController {
     @RequestMapping(value = "/push", method = RequestMethod.GET)
     @ResponseBody
     long push() {
-        webService.pushGeneratedData(100);
+        boolean success = webService.pushGeneratedData(100);
+        if (!success) {
+            return -1;
+        }
         long duration = -1;
         while (duration == -1) {
             duration = webService.getDuration();
