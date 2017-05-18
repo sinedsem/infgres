@@ -35,7 +35,7 @@ public class WebService {
 
     //    private String host = "192.168.1.250";
     private String host = "localhost";
-    private List<DatamineEntity> generatedData = new ArrayList<>();
+    private List<DatamineEntity> preparedData = new ArrayList<>();
 
     private final CloseableHttpClient httpClient;
     private ExecutorService requestExecutor = Executors.newFixedThreadPool(10);
@@ -162,7 +162,7 @@ public class WebService {
     }
 
     public void loadEntitiesFromFile() {
-        generatedData = new ArrayList<>();
+        preparedData = new ArrayList<>();
         loadEntitiesFromFile("backup_job.txt", BackupJob.class);
         loadEntitiesFromFile("backup_configuration.txt", BackupConfiguration.class);
     }
@@ -172,24 +172,24 @@ public class WebService {
             String line;
             while ((line = reader.readLine()) != null) {
                 DatamineEntity entity = mapper.readValue(line, clazz);
-                generatedData.add(entity);
+                preparedData.add(entity);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public boolean pushGeneratedData(int batchSize) {
+    public boolean pushPreparedData(int batchSize) {
         resetStopwatch();
 
-        System.out.println("pushing " + generatedData.size());
+        System.out.println("pushing " + preparedData.size());
 
-        List<Callable<Void>> tasks = new ArrayList<>(generatedData.size() / batchSize);
+        List<Callable<Void>> tasks = new ArrayList<>(preparedData.size() / batchSize);
 
-        for (int i = 0; i < generatedData.size(); i += batchSize) {
+        for (int i = 0; i < preparedData.size(); i += batchSize) {
             List<DatamineEntity> batch = new ArrayList<>(batchSize);
-            for (int j = 0; j < batchSize && i + j < generatedData.size(); j++) {
-                batch.add(generatedData.get(i + j));
+            for (int j = 0; j < batchSize && i + j < preparedData.size(); j++) {
+                batch.add(preparedData.get(i + j));
             }
 
             tasks.add(() -> {
@@ -271,39 +271,39 @@ public class WebService {
 
     public synchronized byte[] getReport(ServerReportRequest reportRequest) {
 
-        String url = "http://" + host + ":9010/reporter/report";
+String url = "http://" + host + ":9010/reporter/report";
 
-        CloseableHttpResponse response = null;
-        reportRequestStartTime = System.nanoTime();
-        reportRequestEndTime = -1;
+CloseableHttpResponse response = null;
+reportRequestStartTime = System.nanoTime();
+reportRequestEndTime = -1;
+try {
+    HttpPost request = new HttpPost(url);
+    request.setEntity(new StringEntity(objectToJson(reportRequest), "utf-8"));
+    request.setHeader("Content-Type", "application/json");
+    response = httpClient.execute(request);
+} catch (IOException e) {
+    e.printStackTrace();
+}
+if (response != null) {
+    try {
+        if (response.getStatusLine().getStatusCode() == 200) {
+            byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
+            reportRequestEndTime = System.nanoTime();
+            response.close();
+            return result;
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
         try {
-            HttpPost request = new HttpPost(url);
-            request.setEntity(new StringEntity(objectToJson(reportRequest), "utf-8"));
-            request.setHeader("Content-Type", "application/json");
-            response = httpClient.execute(request);
+            response.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (response != null) {
-            try {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    byte[] result = IOUtils.toByteArray(response.getEntity().getContent());
-                    reportRequestEndTime = System.nanoTime();
-                    response.close();
-                    return result;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return new byte[0];
     }
+}
+return new byte[0];
+}
 
     public synchronized long getReportDuration() {
         if (reportRequestEndTime == -1) {

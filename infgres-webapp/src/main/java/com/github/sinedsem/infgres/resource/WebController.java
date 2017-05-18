@@ -22,7 +22,7 @@ public class WebController {
     @RequestMapping(value = "/push", method = RequestMethod.GET)
     @ResponseBody
     long push() {
-        boolean success = webService.pushGeneratedData(100);
+        boolean success = webService.pushPreparedData(100);
         if (!success) {
             return -1;
         }

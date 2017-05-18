@@ -166,31 +166,25 @@ function reportDuration(influx) {
 }
 
 function saveToFile(event) {
-    var data = "Hello!";
-
     var results = [];
-
     var i = 0;
     while (chart.options.data[0].dataPoints[i] || chart.options.data[1].dataPoints[i]) {
         if (chart.options.data[0].dataPoints[i]) {
-            var influx = {};
-            influx.index = chart.options.data[0].dataPoints[i].x;
-            influx.dbms = chart.options.data[0].name;
-            influx.action = chart.options.data[0].dataPoints[i].label;
-            influx.time = chart.options.data[0].dataPoints[i].y;
-            results.push(influx);
+            addMeasurement(i, 0);
         }
         if (chart.options.data[1].dataPoints[i]) {
-            var postgres = {};
-            postgres.index = chart.options.data[1].dataPoints[i].x;
-            postgres.dbms = chart.options.data[1].name;
-            postgres.action = chart.options.data[1].dataPoints[i].label;
-            postgres.time = chart.options.data[1].dataPoints[i].y;
-            results.push(postgres);
+            addMeasurement(i, 1);
         }
         i++;
     }
-
-
     event.target.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(results));
+
+    function addMeasurement(i, j) {
+        var measurement = {};
+        measurement.index = chart.options.data[j].dataPoints[i].x;
+        measurement.dbms = chart.options.data[j].name;
+        measurement.action = chart.options.data[j].dataPoints[i].label;
+        measurement.time = chart.options.data[j].dataPoints[i].y;
+        results.push(measurement);
+    }
 }
