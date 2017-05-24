@@ -75,9 +75,9 @@ public class WebService {
                 BackupConfiguration backupConfiguration = new BackupConfiguration();
                 backupConfiguration.setStartTime(startTime);
                 backupConfiguration.setEndTime(nextEndTime);
-                backupConfiguration.setSchedule("0 0 12 1/1 * ? *");
-                backupConfiguration.setPath("C:/");
-                backupConfiguration.setLevel("Full");
+                backupConfiguration.setSchedule("0 0 " + String.valueOf(random.nextInt(12)) +" 1/1 * ? *");
+                backupConfiguration.setPath("C:/data/" + UUID.randomUUID().toString());
+                backupConfiguration.setLevel(random.nextBoolean() ? "Full" : "Incremental");
                 backupConfiguration.setNodeId(nodeId);
                 list.add(backupConfiguration);
                 startTime = nextEndTime;
@@ -109,11 +109,11 @@ public class WebService {
                 backupJob.setStartTime(startTime);
                 backupJob.setEndTime(startTime + random.nextInt(1000));
                 backupJob.setNodeId(nodeId);
-                backupJob.setLevel(random.nextBoolean() ? "full" : "incremental");
+                backupJob.setLevel(random.nextBoolean() ? "Full" : "Incremental");
                 backupJob.setErrorCode(random.nextInt(8));
                 backupJob.setJobSize(random.nextInt(50_000_000));
-                backupJob.setStatus("unknown");
-                backupJob.setPath("C:\\Users\\Administrator\\Documents\\Pictures");
+                backupJob.setStatus(random.nextBoolean() ? "Success" : "Failed");
+                backupJob.setPath("C:/data/" + UUID.randomUUID().toString());
 
                 startTime += random.nextInt(DAY_IN_SECONDS);
 
