@@ -2,17 +2,18 @@ package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.config.Repositories;
 import com.github.sinedsem.infgres.datamodel.AgentReport;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
-import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportProcessor {
@@ -48,18 +49,8 @@ public class ReportProcessor {
     }
 
     private void persistPostgres(AgentReport agentReport) {
-        Set<UUID> nodes = new HashSet<>();
-//        Utils.seizeEntities(agentReport.getEntities());
-        List<EventDatamineEntity> eventEntities = new ArrayList<>(agentReport.getEntities().size());
-        for (DatamineEntity datamineEntity : agentReport.getEntities()) {
-            nodes.add(datamineEntity.getNodeId());
-            datamineEntity.setRequestId(agentReport.getId());
-            if (datamineEntity instanceof EventDatamineEntity) {
-                eventEntities.add((EventDatamineEntity) datamineEntity);
-            } else {
-                postgresPersister.persist(datamineEntity);
-            }
-        }
+
+        Set<UUID> nodes = agentReport.getEntities().stream().map(DatamineEntity::getNodeId).collect(Collectors.toSet());
 
         nodesExecutor.submit(() -> {
             for (UUID nodeId : nodes) {
@@ -67,7 +58,7 @@ public class ReportProcessor {
             }
         });
 
-        postgresPersister.persistEventEntities(eventEntities);
+        postgresPersister.persistEntities(agentReport.getEntities());
     }
 
     private void persistInflux(AgentReport agentReport) {

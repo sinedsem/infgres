@@ -2,9 +2,7 @@ package com.github.sinedsem.infgres.service;
 
 import com.github.sinedsem.infgres.datamodel.Grp;
 import com.github.sinedsem.infgres.datamodel.Node;
-import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
+import com.github.sinedsem.infgres.datamodel.datamine.*;
 import com.github.sinedsem.infgres.repository.NodeRepository;
 import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
 import com.github.sinedsem.infgres.repository.datamine.EventRepository;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 public class PostgresPersister {
@@ -22,7 +21,6 @@ public class PostgresPersister {
     private final RepositoriesService repositoriesService;
     private final NodeRepository nodeRepository;
     private final AtomicLong endTime;
-
 
     @Autowired
     public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime) {
@@ -111,14 +109,25 @@ public class PostgresPersister {
         }
     }
 
-    public void persistEventEntities(List<EventDatamineEntity> entities) {
+    public void persistEntities(List<DatamineEntity> entities) {
         if (entities == null || entities.isEmpty()) {
             return;
         }
 
-        EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entities.get(0));
+        List<BackupJob> backupJobs = entities.stream()
+                .filter(e -> e instanceof BackupJob)
+                .map(e -> (BackupJob)e).collect(Collectors.toList());
 
-        repository.save(entities);
+        EventRepository backupJobRepository = repositoriesService.getEventRepositoryByClass(BackupJob.class);
+        backupJobRepository.save(backupJobs);
+
+
+        List<BackupConfiguration> backupConfigurations = entities.stream()
+                .filter(e -> e instanceof BackupConfiguration)
+                .map(e -> (BackupConfiguration)e).collect(Collectors.toList());
+
+        ContinuousRepository backupConfigurationRepository = repositoriesService.getContinuousRepositoryByClass(BackupConfiguration.class);
+        backupConfigurationRepository.save(backupConfigurations);
 
         endTime.set(System.nanoTime());
     }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.github.sinedsem.infgres.utils.Utils.seizeEntities;
+
 @Service
 public class PostgresReporter {
 
@@ -33,6 +35,9 @@ public class PostgresReporter {
         }
 
         List<DatamineEntity> entities = repository.makeReport(nodeIds, startTime, endTime);
+
+        seizeEntities(entities);
+
         Map<UUID, NodeEntities> nodeEntitiesMap = new HashMap<>();
 
         for (DatamineEntity entity : entities) {
