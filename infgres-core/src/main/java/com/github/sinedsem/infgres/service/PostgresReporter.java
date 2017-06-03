@@ -36,7 +36,9 @@ public class PostgresReporter {
 
         List<DatamineEntity> entities = repository.makeReport(nodeIds, startTime, endTime);
 
-        seizeEntities(entities);
+        if (ContinuousDatamineEntity.class.isAssignableFrom(clazz)) {
+            seizeEntities(entities);
+        }
 
         Map<UUID, NodeEntities> nodeEntitiesMap = new HashMap<>();
 
