@@ -58,7 +58,7 @@ public class ReportProcessor {
             }
         });
 
-        postgresPersister.persistEntities(agentReport.getEntities());
+        postgresPersister.persist(agentReport);
     }
 
     private void persistInflux(AgentReport agentReport) {

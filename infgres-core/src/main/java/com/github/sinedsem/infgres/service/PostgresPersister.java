@@ -1,8 +1,11 @@
 package com.github.sinedsem.infgres.service;
 
+import com.github.sinedsem.infgres.datamodel.AgentReport;
 import com.github.sinedsem.infgres.datamodel.Grp;
 import com.github.sinedsem.infgres.datamodel.Node;
-import com.github.sinedsem.infgres.datamodel.datamine.*;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
+import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
+import com.github.sinedsem.infgres.datamodel.datamine.DatamineEntity;
 import com.github.sinedsem.infgres.repository.NodeRepository;
 import com.github.sinedsem.infgres.repository.datamine.ContinuousRepository;
 import com.github.sinedsem.infgres.repository.datamine.EventRepository;
@@ -11,91 +14,79 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
 public class PostgresPersister {
 
     private final RepositoriesService repositoriesService;
-    private final NodeRepository nodeRepository;
+
+    private final ExecutorService persisterExecutor;
+
+    private volatile Set<DatamineEntity> entitiesToPersist = ConcurrentHashMap.newKeySet();
+    private Lock lock = new ReentrantLock();
+
     private final AtomicLong endTime;
 
+    private final NodeRepository nodeRepository;
+
     @Autowired
-    public PostgresPersister(RepositoriesService repositoriesService, NodeRepository nodeRepository, @Qualifier("endTime") AtomicLong endTime) {
+    public PostgresPersister(RepositoriesService repositoriesService, @Qualifier("endTime") AtomicLong endTime, NodeRepository nodeRepository) {
         this.repositoriesService = repositoriesService;
-        this.nodeRepository = nodeRepository;
         this.endTime = endTime;
+        this.persisterExecutor = Executors.newSingleThreadExecutor();
+        this.nodeRepository = nodeRepository;
     }
 
-    boolean persist(DatamineEntity entity) {
-        if (entity instanceof ContinuousDatamineEntity) {
-            return persist((ContinuousDatamineEntity) entity);
-        } else if (entity instanceof EventDatamineEntity) {
-            return persist((EventDatamineEntity) entity);
-        }
-        return false;
-    }
+    boolean persist(AgentReport agentReport) {
 
-    synchronized boolean persist(ContinuousDatamineEntity entity) {
+        entitiesToPersist.addAll(agentReport.getEntities());
+        endTime.set(-1);
 
-        @SuppressWarnings("unchecked")
-        ContinuousRepository<ContinuousDatamineEntity> repository = repositoriesService.getRepository(entity);
-
-        ContinuousDatamineEntity previous = repository.getPrevious(entity);
-
-        if (previous != null && previous.getEndTime() >= entity.getStartTime()) {
-            if (previous.equals(entity)) {
-                previous.setEndTime(entity.getEndTime());
-                previous.setRequestId(entity.getRequestId());
-                repository.save(previous);
-                entity = previous;
-            } else {
-                previous.setEndTime(entity.getStartTime() - 1);
-                if (previous.getStartTime() >= previous.getEndTime()) {
-                    entity.setId(previous.getId());
-                } else {
-                    repository.save(previous);
-                }
-                repository.save(entity);
-            }
-        } else {
-            repository.save(entity);
-        }
-
-        ContinuousDatamineEntity next = repository.getNext(entity);
-
-        if (next != null && next.getStartTime() <= entity.getEndTime()) {
-            if (next.equals(entity)) {
-                next.setRequestId(entity.getRequestId());
-                next.setStartTime(entity.getStartTime());
-                repository.delete(entity);
-                repository.save(next);
-            } else {
-                entity.setEndTime(next.getStartTime() - 1);
-                if (entity.getStartTime() >= entity.getEndTime()) {
-                    repository.delete(entity);
-                } else {
-                    repository.save(entity);
+        // executing in another thread to release http request
+        persisterExecutor.submit(() -> {
+            if (lock.tryLock()) {
+                try {
+                    doPersist();
+                } finally {
+                    lock.unlock();
                 }
             }
-        }
-
-        endTime.set(System.nanoTime());
+        });
 
         return true;
     }
 
-    boolean persist(EventDatamineEntity entity) {
-        UUID nodeId = entity.getNodeId();
+    private void doPersist() {
+        if (entitiesToPersist == null || entitiesToPersist.isEmpty()) {
+            return;
+        }
 
-        EventRepository<EventDatamineEntity> repository = repositoriesService.getRepository(entity);
+        List<BackupJob> backupJobs = entitiesToPersist.stream()
+                .filter(e -> e instanceof BackupJob)
+                .map(e -> (BackupJob)e).collect(Collectors.toList());
 
-        repository.save(entity);
+        EventRepository backupJobRepository = repositoriesService.getEventRepositoryByClass(BackupJob.class);
+        backupJobRepository.save(backupJobs);
+
+
+        List<BackupConfiguration> backupConfigurations = entitiesToPersist.stream()
+                .filter(e -> e instanceof BackupConfiguration)
+                .map(e -> (BackupConfiguration)e).collect(Collectors.toList());
+
+        ContinuousRepository backupConfigurationRepository = repositoriesService.getContinuousRepositoryByClass(BackupConfiguration.class);
+        backupConfigurationRepository.save(backupConfigurations);
 
         endTime.set(System.nanoTime());
-        return true;
+
     }
 
     void createNodeIfNotExists(UUID nodeId) {
@@ -109,26 +100,4 @@ public class PostgresPersister {
         }
     }
 
-    public void persistEntities(List<DatamineEntity> entities) {
-        if (entities == null || entities.isEmpty()) {
-            return;
-        }
-
-        List<BackupJob> backupJobs = entities.stream()
-                .filter(e -> e instanceof BackupJob)
-                .map(e -> (BackupJob)e).collect(Collectors.toList());
-
-        EventRepository backupJobRepository = repositoriesService.getEventRepositoryByClass(BackupJob.class);
-        backupJobRepository.save(backupJobs);
-
-
-        List<BackupConfiguration> backupConfigurations = entities.stream()
-                .filter(e -> e instanceof BackupConfiguration)
-                .map(e -> (BackupConfiguration)e).collect(Collectors.toList());
-
-        ContinuousRepository backupConfigurationRepository = repositoriesService.getContinuousRepositoryByClass(BackupConfiguration.class);
-        backupConfigurationRepository.save(backupConfigurations);
-
-        endTime.set(System.nanoTime());
-    }
 }
