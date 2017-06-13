@@ -1,8 +1,8 @@
 package com.github.sinedsem.infgres.config;
 
+import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.BackupJob;
 import com.github.sinedsem.infgres.datamodel.datamine.ContinuousDatamineEntity;
-import com.github.sinedsem.infgres.datamodel.datamine.BackupConfiguration;
 import com.github.sinedsem.infgres.datamodel.datamine.EventDatamineEntity;
 import com.github.sinedsem.infgres.repository.impl.AbstractRepositoryImpl;
 import com.github.sinedsem.infgres.repository.impl.ContinuousRepositoryImpl;
@@ -10,7 +10,6 @@ import com.github.sinedsem.infgres.repository.impl.EventRepositoryImpl;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,15 +19,11 @@ import javax.persistence.EntityManager;
 @Configuration
 public class Repositories {
 
-    @Value("${influx}")
-    private boolean influx;
+    private boolean influx = true;
 
     @Bean
     public InfluxDB influxDB() {
-        if (influx) {
-            return InfluxDBFactory.connect("http://127.0.0.1:8086", "root", "root");
-        }
-        return null;
+        return InfluxDBFactory.connect("http://127.0.0.1:8086", "root", "root");
     }
 
     @Bean

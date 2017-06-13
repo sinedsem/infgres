@@ -19,7 +19,7 @@ public class RepositoriesService {
         repositories = new Repositories(appContext);
     }
 
-    ContinuousRepository getRepository(ContinuousDatamineEntity entity) {
+    public ContinuousRepository getRepository(ContinuousDatamineEntity entity) {
         //noinspection unchecked
         return (ContinuousRepository) repositories.getRepositoryFor(entity.getClass());
     }
